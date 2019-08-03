@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">kakao intern</string>
+    <string name="developer_name">강주열</string>
+    <string name="search">kakao_image_search</string>
+    <string name="image_search_hint">찾고싶은 이미지를 검색하세요!</string>
+    <string name="title_activity_image_detail">ImageDetailActivity</string>
+</resources>
