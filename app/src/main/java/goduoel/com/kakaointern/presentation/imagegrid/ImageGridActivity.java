@@ -20,12 +20,10 @@ import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.databinding.ActivityMainGridBinding;
 import goduoel.com.kakaointern.presentation.BaseActivity;
 import goduoel.com.kakaointern.presentation.imagedetail.ImageDetailActivity;
-import goduoel.com.kakaointern.utils.KeyboardUtil;
+import goduoel.com.kakaointern.utils.Constants;
 
 
 public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
-    public static final String EXTRA_IMAGE_POSITION = "EXTRA_IMAGE_POSITION";
-    public static final int REQUEST_CURRENT_POSITION = 1234;
 
     @Override
     protected int getLayoutResourceId() {
@@ -52,6 +50,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
 
     private void initMenuView(Menu menu) {
         MenuItem searchMenu = menu.findItem(R.id.image_search);
+
         SearchView searchView = (SearchView) searchMenu.getActionView();
 
         searchView.setQueryHint(getString(R.string.image_search_hint));
@@ -60,7 +59,8 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 binding.getImagegridVm().getImage(query);
-                KeyboardUtil.closeKeyboard(getBaseContext());
+                searchView.clearFocus();
+//                KeyboardUtil.closeKeyboard(getBaseContext());
                 return true;
             }
 
@@ -84,8 +84,8 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
                 new ImageGridRecyclerViewAdapter((sharedImageView, position) -> {
                     saveToPassData();
                     Intent intent = new Intent(this, ImageDetailActivity.class);
-                    intent.putExtra(EXTRA_IMAGE_POSITION, position);
-                    startActivityForResult(intent, REQUEST_CURRENT_POSITION);
+                    intent.putExtra(Constants.EXTRA_IMAGE_POSITION, position);
+                    startActivityForResult(intent, Constants.REQUEST_CURRENT_POSITION);
                 }, () -> binding.getImagegridVm().getMoreImage())
         );
     }

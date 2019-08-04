@@ -1,10 +1,16 @@
 package goduoel.com.kakaointern.presentation.imagedetail;
 
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,11 +21,14 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
 import goduoel.com.kakaointern.R;
+import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.databinding.ActivityImageDetailBinding;
 import goduoel.com.kakaointern.presentation.BaseActivity;
 import goduoel.com.kakaointern.presentation.imagegrid.ImageGridActivity;
 import goduoel.com.kakaointern.presentation.imagemenu.ImageMenuFragment;
+import goduoel.com.kakaointern.utils.Constants;
+import goduoel.com.kakaointern.utils.DownloadUtil;
 import goduoel.com.kakaointern.utils.ImageUtil;
 
 public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding> implements ImageMenuFragment.OnImageMenuListener {
@@ -32,15 +41,14 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         return R.layout.activity_image_detail;
     }
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            imageDocumentPosition = extras.getInt(ImageGridActivity.EXTRA_IMAGE_POSITION);
+            imageDocumentPosition = extras.getInt(Constants.EXTRA_IMAGE_POSITION);
         }
-
+        registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         initViewModel();
         initViewPager();
         initFragment();
@@ -53,6 +61,12 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
             ImageMenuFragment headlinesFragment = (ImageMenuFragment) fragment;
             headlinesFragment.setOnImageMenuListener(this);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(onDownloadComplete);
+        super.onDestroy();
     }
 
     private void initFragment() {
@@ -106,12 +120,18 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         binding.getImagedetailVm().saveDataToRepository();
     }
 
+
+    private ImageDataResult.ImageDocument getCurrentGridITem() {
+        ImageDetailViewPagerAdapter imageDetailViewPagerAdapter =
+                ((ImageDetailViewPagerAdapter) binding.viewpagerImageDetail.getAdapter());
+        return imageDetailViewPagerAdapter.getItem(binding.viewpagerImageDetail.getCurrentItem());
+    }
+
     @Override
     public void onShared() {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("image/*");
         AppCompatImageView currentView = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0)).getLayoutManager().findViewByPosition(binding.viewpagerImageDetail.getCurrentItem()).findViewById(R.id.detail_image);
-
         Uri bmpUri = ImageUtil.getViewBitmapUri(currentView);
         intent.putExtra(Intent.EXTRA_STREAM, bmpUri);
         startActivity(Intent.createChooser(intent, getString(R.string.share)));
@@ -119,10 +139,49 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
 
     @Override
     public void onStie() {
-        String url = ((ImageDetailViewPagerAdapter) binding.viewpagerImageDetail.getAdapter()).getItem(binding.viewpagerImageDetail.getCurrentItem()).getDocUrl();
+        String url = getCurrentGridITem().getDocUrl();
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
         startActivity(intent);
+    }
+
+    @Override
+    public void onDown() {
+        String url = getCurrentGridITem().getImageUrl();
+        beginDownload(url);
+    }
+
+    private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
+
+                DownloadManager.Query query = new DownloadManager.Query();
+
+                long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+
+                query.setFilterById(downloadId);
+                DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+
+                Cursor cursor = manager.query(query);
+                if (cursor.moveToFirst()) {
+                    if (cursor.getCount() > 0) {
+                        int status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+
+                        if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                            Toast.makeText(ImageDetailActivity.this, "다운로드 완료", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+                cursor.close();
+
+            }
+        }
+    };
+
+    private void beginDownload(String url) {
+        DownloadUtil.DownloadImageFIleToUrl(this, url);
     }
 
 }

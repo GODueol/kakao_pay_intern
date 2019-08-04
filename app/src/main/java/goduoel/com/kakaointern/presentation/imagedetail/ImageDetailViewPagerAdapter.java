@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -65,7 +66,13 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
         return itemList.size() + 1;
     }
 
+    @Nullable
     ImageDataResult.ImageDocument getItem(int position) {
+        if (itemList == null) {
+            return null;
+        } else if (itemList.size() <= position) {
+            return null;
+        }
         return itemList.get(position);
     }
 

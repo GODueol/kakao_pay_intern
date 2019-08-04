@@ -1,20 +1,15 @@
 package goduoel.com.kakaointern.presentation.imagemenu;
 
-import androidx.lifecycle.ViewModelProviders;
-
-import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import android.view.View;
+import androidx.lifecycle.ViewModelProviders;
 
 import goduoel.com.kakaointern.R;
-import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.databinding.ImageMenuFragmentBinding;
 import goduoel.com.kakaointern.presentation.BaseFragment;
-import goduoel.com.kakaointern.presentation.imagedetail.ImageDetailActivity;
 
 public class ImageMenuFragment extends BaseFragment<ImageMenuFragmentBinding> {
 
@@ -29,8 +24,9 @@ public class ImageMenuFragment extends BaseFragment<ImageMenuFragmentBinding> {
         void onShared();
 
         void onStie();
-    }
 
+        void onDown();
+    }
 
     public void setOnImageMenuListener(OnImageMenuListener onHandleCurrentImage) {
         this.onHandleCurrentImage = onHandleCurrentImage;
@@ -58,8 +54,12 @@ public class ImageMenuFragment extends BaseFragment<ImageMenuFragmentBinding> {
             onHandleCurrentImage.onShared();
         });
 
-        binding.btnSite.setOnClickListener(v ->{
+        binding.btnSite.setOnClickListener(v -> {
             onHandleCurrentImage.onStie();
+        });
+
+        binding.btnDownload.setOnClickListener(v -> {
+            onHandleCurrentImage.onDown();
         });
     }
 
