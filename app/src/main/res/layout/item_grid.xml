@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable name="url" type="String"/>
     </data>
@@ -10,5 +10,6 @@
         android:id="@+id/thumbnail_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        tools:src="@drawable/img_load_image"
         app:uri="@{url}"/>
 </layout>

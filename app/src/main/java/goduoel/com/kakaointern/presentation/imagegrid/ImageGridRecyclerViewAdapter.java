@@ -53,7 +53,7 @@ public class ImageGridRecyclerViewAdapter extends ListAdapter<ImageDataResult.Im
         }
 
         if (position == getItemCount() - 5) {
-//            onPagingScrollListener.onLoadMore();
+            onPagingScrollListener.onLoadMore();
         }
     }
 

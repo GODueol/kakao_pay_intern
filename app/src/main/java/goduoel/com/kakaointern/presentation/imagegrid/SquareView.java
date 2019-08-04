@@ -22,7 +22,6 @@ public class SquareView extends AppCompatImageView {
 
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // This is the key that will make the height equivalent to its width
         super.onMeasure(widthMeasureSpec, widthMeasureSpec);
     }
 }

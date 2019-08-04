@@ -1,77 +1,70 @@
 package goduoel.com.kakaointern.presentation.imagedetail;
 
 import android.app.Activity;
-import android.app.SharedElementCallback;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.ViewCompat;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.List;
-import java.util.Map;
 
 import goduoel.com.kakaointern.R;
 import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.databinding.ActivityImageDetailBinding;
 import goduoel.com.kakaointern.presentation.BaseActivity;
 import goduoel.com.kakaointern.presentation.imagegrid.ImageGridActivity;
+import goduoel.com.kakaointern.presentation.imagemenu.ImageMenuFragment;
+import goduoel.com.kakaointern.utils.ImageUtil;
 
-public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding> {
+public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding> implements ImageMenuFragment.OnImageMenuListener {
 
     public static final String EXTRA_CURRENT_POSITION = "EXTRA_CURRENT_POSITION";
     private int imageDocumentPosition;
-    private String imageTransitionName;
-    private int newPosition;
-    private boolean isReturning = false;
 
     @Override
     protected int getLayoutResourceId() {
         return R.layout.activity_image_detail;
     }
 
-    private SharedElementCallback enterElementCallback = new SharedElementCallback() {
-        @Override
-        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-            super.onMapSharedElements(names, sharedElements);
-            if (isReturning) {
-                View sharedElement = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0)).getLayoutManager().findViewByPosition(newPosition);
-                names.clear();
-                names.add(ViewCompat.getTransitionName(sharedElement));
-
-                sharedElements.clear();
-                sharedElements.put(ViewCompat.getTransitionName(sharedElement), sharedElement);
-            }
-
-        }
-    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        postponeEnterTransition();
-        setEnterSharedElementCallback(enterElementCallback);
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             imageDocumentPosition = extras.getInt(ImageGridActivity.EXTRA_IMAGE_POSITION);
-            imageTransitionName = extras.getString(ImageGridActivity.EXTRA_IMAGE_TRANSITION_NAME);
         }
 
         initViewModel();
         initViewPager();
+        initFragment();
+    }
+
+    @Override
+    public void onAttachFragment(@NonNull Fragment fragment) {
+        super.onAttachFragment(fragment);
+        if (fragment instanceof ImageMenuFragment) {
+            ImageMenuFragment headlinesFragment = (ImageMenuFragment) fragment;
+            headlinesFragment.setOnImageMenuListener(this);
+        }
+    }
+
+    private void initFragment() {
+        Fragment menuFragment = ImageMenuFragment.newInstance();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.frame_menu, menuFragment)
+                .commitAllowingStateLoss();
     }
 
     private void initViewPager() {
         binding.viewpagerImageDetail.setAdapter(new ImageDetailViewPagerAdapter(() -> binding.getImagedetailVm().getMoreImage()));
-        binding.viewpagerImageDetail.post(() -> {
-            binding.viewpagerImageDetail.setCurrentItem(imageDocumentPosition, false);
-            binding.viewpagerImageDetail.post(this::startPostponedEnterTransition);
-        });
+        binding.viewpagerImageDetail.post(() -> binding.viewpagerImageDetail.setCurrentItem(imageDocumentPosition, false));
 
     }
 
@@ -97,53 +90,39 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
 
     @Override
     public void onBackPressed() {
-
-        finishAfterTransition();
-    }
-
-    @Override
-    public void finishAfterTransition() {
+        saveToPassData();
         setResult();
-        super.finishAfterTransition();
+        finish();
     }
 
     private void setResult() {
-        binding.getImagedetailVm().saveDataToRepository();
-        isReturning = true;
-
-        newPosition = binding.viewpagerImageDetail.getCurrentItem();
         Intent intent = new Intent();
         intent.putExtra(EXTRA_CURRENT_POSITION, binding.viewpagerImageDetail.getCurrentItem());
         setResult(Activity.RESULT_OK, intent);
-    }
-    /*
-    private void initView() {
-        // 로딩 전 깜빡임 처리
-        postponeEnterTransition();
-
-        Glide.with(binding.imgDetail)
-                .load(imageDocumentPosition.getImageUrl())
-                .fitCenter()
-                .listener(postPoneListener)
-                .apply(new RequestOptions().error(R.drawable.img_load_fail))
-                .listener(postPoneListener)
-                .into(binding.imgDetail);
-
-        Log.d(TAG, imageDocumentPosition.toString());
+        finish();
     }
 
-    private RequestListener<Drawable> postPoneListener = new RequestListener<Drawable>() {
+    private void saveToPassData() {
+        binding.getImagedetailVm().saveDataToRepository();
+    }
 
-        @Override
-        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-            startPostponedEnterTransition();
-            return false;
-        }
+    @Override
+    public void onShared() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/*");
+        AppCompatImageView currentView = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0)).getLayoutManager().findViewByPosition(binding.viewpagerImageDetail.getCurrentItem()).findViewById(R.id.detail_image);
 
-        @Override
-        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-            startPostponedEnterTransition();
-            return false;
-        }
-    };*/
+        Uri bmpUri = ImageUtil.getViewBitmapUri(currentView);
+        intent.putExtra(Intent.EXTRA_STREAM, bmpUri);
+        startActivity(Intent.createChooser(intent, getString(R.string.share)));
+    }
+
+    @Override
+    public void onStie() {
+        String url = ((ImageDetailViewPagerAdapter) binding.viewpagerImageDetail.getAdapter()).getItem(binding.viewpagerImageDetail.getCurrentItem()).getDocUrl();
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        startActivity(intent);
+    }
+
 }

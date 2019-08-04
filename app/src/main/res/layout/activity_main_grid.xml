@@ -35,9 +35,7 @@
             android:layout_height="match_parent"
             android:overScrollMode="never"
             app:items="@{imagegridVm.imageDataList}"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            app:spanCount="4"
             tools:listitem="@layout/item_grid" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

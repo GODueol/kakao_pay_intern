@@ -25,7 +25,7 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
     private List<ImageDataResult.ImageDocument> itemList;
     private OnPagingScrollListener onPagingScrollListener;
 
-    public ImageDetailViewPagerAdapter(OnPagingScrollListener onPagingScrollListener) {
+    ImageDetailViewPagerAdapter(OnPagingScrollListener onPagingScrollListener) {
         this.onPagingScrollListener = onPagingScrollListener;
     }
 
@@ -38,12 +38,12 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
     @Override
     public ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_viewpager, parent, false);
-        ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder holder = new ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder(itemView);
-        return holder;
+        return new ImageDetailViewPagerViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder holder, int position) {
+
         if (position >= itemList.size()) {
             Glide.with(holder.binding.detailImage).load(R.drawable.img_load_image)
                     .fitCenter()
@@ -55,7 +55,6 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
         }
         ImageDataResult.ImageDocument item = itemList.get(position);
         holder.binding.setUrl(item.getImageUrl());
-        ViewCompat.setTransitionName(holder.binding.detailImage, item.getImageUrl());
     }
 
     @Override
@@ -64,6 +63,10 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
             return 0;
 
         return itemList.size() + 1;
+    }
+
+    ImageDataResult.ImageDocument getItem(int position) {
+        return itemList.get(position);
     }
 
     static class ImageDetailViewPagerViewHolder extends RecyclerView.ViewHolder {

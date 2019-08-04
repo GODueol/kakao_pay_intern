@@ -32,7 +32,7 @@ public class ImageRepository implements ImageDataSource {
         cacheRequestHeader.setSort(sort);
         cacheRequestHeader.setPage(page);
         return ImageService.getInstance().api
-                .getImageList(query, sort.getType(), page, 5)
+                .getImageList(query, sort.getType(), page, 80)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
