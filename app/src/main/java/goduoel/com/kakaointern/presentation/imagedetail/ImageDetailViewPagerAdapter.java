@@ -123,7 +123,9 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
         ImageDetailViewPagerViewHolder(View itemView) {
             super(itemView);
             binding = DataBindingUtil.bind(itemView);
-            binding.detailImage.setOnClickListener(v -> Log.d("test", "누름"));
+            if (binding != null) {
+                binding.detailImage.setOnClickListener(v -> Log.d("test", "누름"));
+            }
         }
 
     }

@@ -11,8 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import goduoel.com.kakaointern.presentation.imagedetail.PinchScaleImageView;
-
 public class DynamicColumGridView extends RecyclerView {
 
     private GridLayoutManager gridLayoutManager;

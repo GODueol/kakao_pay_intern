@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -49,12 +50,21 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
             super.onMapSharedElements(names, sharedElements);
             if (isReturning) {
 
-                View sharedElement = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0)).findViewHolderForAdapterPosition(newPosition).itemView;
+                RecyclerView recyclerView = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0));
+                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(newPosition);
+                if (viewHolder == null) {
+                    return;
+                }
+                View sharedElement = viewHolder.itemView;
+                String transitionName = ViewCompat.getTransitionName(sharedElement);
+                if (transitionName == null) {
+                    return;
+                }
                 names.clear();
-                names.add(ViewCompat.getTransitionName(sharedElement));
+                names.add(transitionName);
 
                 sharedElements.clear();
-                sharedElements.put(ViewCompat.getTransitionName(sharedElement), sharedElement);
+                sharedElements.put(transitionName, sharedElement);
             }
 
         }
@@ -90,6 +100,9 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     private void initView() {
 
         binding.overlayMenu.setOnDownListener(v -> {
+            if (getCurrentGridITem() == null) {
+                return;
+            }
             String url = getCurrentGridITem().getImageUrl();
             beginDownload(url);
         });
@@ -97,13 +110,24 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         binding.overlayMenu.setOnShareListener(v -> {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("image/*");
-            AppCompatImageView currentView = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0)).getLayoutManager().findViewByPosition(binding.viewpagerImageDetail.getCurrentItem()).findViewById(R.id.detail_image);
-            Uri bmpUri = ImageUtil.getViewBitmapUri(currentView);
+            RecyclerView.LayoutManager linearLayout = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0)).getLayoutManager();
+            if (linearLayout == null) {
+                return;
+            }
+            View currentView = linearLayout.findViewByPosition(binding.viewpagerImageDetail.getCurrentItem());
+            if (currentView == null) {
+                return;
+            }
+            AppCompatImageView currentImageView = currentView.findViewById(R.id.detail_image);
+            Uri bmpUri = ImageUtil.getViewBitmapUri(currentImageView);
             intent.putExtra(Intent.EXTRA_STREAM, bmpUri);
             startActivity(Intent.createChooser(intent, getString(R.string.share)));
         });
 
         binding.overlayMenu.setOnSiteListener(v -> {
+            if (getCurrentGridITem() == null) {
+                return;
+            }
             String url = getCurrentGridITem().getDocUrl();
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
@@ -133,9 +157,7 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     }
 
     private void observeLiveData() {
-        binding.getImagedetailVm().getImageDataList().observe(this, imageDocuments -> {
-            Log.e(TAG, imageDocuments.toString());
-        });
+        binding.getImagedetailVm().getImageDataList().observe(this, imageDocuments -> Log.e(TAG, imageDocuments.toString()));
 
         binding.getImagedetailVm().getIsLoading().observe(this, bool ->
                 Log.e("test", "boolean : " + bool));
@@ -182,14 +204,14 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     private ImageDataResult.ImageDocument getCurrentGridITem() {
         ImageDetailViewPagerAdapter imageDetailViewPagerAdapter =
                 ((ImageDetailViewPagerAdapter) binding.viewpagerImageDetail.getAdapter());
-        return imageDetailViewPagerAdapter.getItem(binding.viewpagerImageDetail.getCurrentItem());
+        return imageDetailViewPagerAdapter != null ? imageDetailViewPagerAdapter.getItem(binding.viewpagerImageDetail.getCurrentItem()) : null;
     }
 
     private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action.equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
+            if (TextUtils.equals(action, DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
 
                 DownloadManager.Query query = new DownloadManager.Query();
 

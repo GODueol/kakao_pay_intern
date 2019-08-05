@@ -8,8 +8,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.github.chrisbanes.photoview.PhotoView;
-
 import java.util.List;
 
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
@@ -28,7 +26,6 @@ public class ImageDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     @NonNull
     private final MutableLiveData<Boolean> isEndData = new MutableLiveData<>();
-
     @NonNull
     private final MutableLiveData<Boolean> menuShowAndHide = new MutableLiveData<>();
 
@@ -71,7 +68,7 @@ public class ImageDetailViewModel extends BaseViewModel {
 
 
     @NonNull
-    public LiveData<Boolean> getMenuShowAndHide() {
+    LiveData<Boolean> getMenuShowAndHide() {
         return menuShowAndHide;
     }
 
@@ -90,7 +87,9 @@ public class ImageDetailViewModel extends BaseViewModel {
                         .subscribe(imageData -> {
                             Log.d("result", imageData.toString());
                             List<ImageDataResult.ImageDocument> loadImageDataList = imageDataList.getValue();
-                            loadImageDataList.addAll(imageData.getDocuments());
+                            if (loadImageDataList != null) {
+                                loadImageDataList.addAll(imageData.getDocuments());
+                            }
                             imageDataList.setValue(loadImageDataList);
                             isEndData.setValue(imageData.getMeta().getIsEnd());
                             isLoading.setValue(false);
