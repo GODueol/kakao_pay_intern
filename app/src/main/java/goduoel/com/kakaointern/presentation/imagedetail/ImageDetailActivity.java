@@ -45,32 +45,6 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     private int newPosition;
     private boolean isReturning = false;
 
-    private SharedElementCallback enterElementCallback = new SharedElementCallback() {
-        @Override
-        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
-            super.onMapSharedElements(names, sharedElements);
-            if (isReturning) {
-
-                RecyclerView recyclerView = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0));
-                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(newPosition);
-                if (viewHolder == null) {
-                    return;
-                }
-                View sharedElement = viewHolder.itemView;
-                String transitionName = ViewCompat.getTransitionName(sharedElement);
-                if (transitionName == null) {
-                    return;
-                }
-                names.clear();
-                names.add(transitionName);
-
-                sharedElements.clear();
-                sharedElements.put(transitionName, sharedElement);
-            }
-
-        }
-    };
-
     @Override
     protected int getLayoutResourceId() {
         return R.layout.activity_image_detail;
@@ -80,7 +54,6 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         hideStatusBar();
-
         postponeEnterTransition();
         setEnterSharedElementCallback(enterElementCallback);
 
@@ -92,7 +65,9 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
             int savePosition = savedInstanceState.getInt(Constants.EXTRA_IMAGE_POSITION, -1);
             imageDocumentPosition = savePosition != -1 ? savePosition : imageDocumentPosition;
         }
+
         registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
         initViewModel();
         initView();
         initViewPager();
@@ -219,6 +194,10 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         return imageDetailViewPagerAdapter != null ? imageDetailViewPagerAdapter.getItem(binding.viewpagerImageDetail.getCurrentItem()) : null;
     }
 
+    private void beginDownload(String url) {
+        DownloadUtil.DownloadImageFIleToUrl(this, url);
+    }
+
     private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -248,8 +227,31 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         }
     };
 
-    private void beginDownload(String url) {
-        DownloadUtil.DownloadImageFIleToUrl(this, url);
-    }
+    private SharedElementCallback enterElementCallback = new SharedElementCallback() {
+        @Override
+        public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
+            super.onMapSharedElements(names, sharedElements);
+            if (isReturning) {
+
+                RecyclerView recyclerView = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0));
+                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(newPosition);
+                if (viewHolder == null) {
+                    return;
+                }
+                View sharedElement = viewHolder.itemView;
+                String transitionName = ViewCompat.getTransitionName(sharedElement);
+                if (transitionName == null) {
+                    return;
+                }
+                names.clear();
+                names.add(transitionName);
+
+                sharedElements.clear();
+                sharedElements.put(transitionName, sharedElement);
+            }
+
+        }
+    };
+
 
 }

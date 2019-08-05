@@ -29,7 +29,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="goduoel.com.kakaointern.provider"
+            android:authorities="goduoel.com.kakaointern.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
 

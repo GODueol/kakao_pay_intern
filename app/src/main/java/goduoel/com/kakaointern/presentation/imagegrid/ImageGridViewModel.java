@@ -29,9 +29,9 @@ public class ImageGridViewModel extends BaseViewModel {
     @NonNull
     private final MutableLiveData<Boolean> isEndData = new MutableLiveData<>();
 
-
-    private int page = 1;
+    private ImageRequestType requestType = ImageRequestType.ACCURACY;
     private String beforeQuery = "";
+    private int page = 1;
 
     private ImageGridViewModel(ImageRepository repository) {
         this.repository = repository;
@@ -66,10 +66,10 @@ public class ImageGridViewModel extends BaseViewModel {
         imageDataList.setValue(repository.loadImageList());
     }
 
-    void getImage(String query) {
+    void getImage(String query, boolean isTypeChange) {
 
         // 쿼리가 비어있거나, 이전과 같으면 무시
-        if (TextUtils.isEmpty(query) || beforeQuery.equals(query)) {
+        if (!isTypeChange && (TextUtils.isEmpty(query) || beforeQuery.equals(query))) {
             return;
         }
 
@@ -80,16 +80,13 @@ public class ImageGridViewModel extends BaseViewModel {
             return;
         }
 
-        page = 1;
         loadImageDataList.clear();
         imageDataList.setValue(loadImageDataList);
-
+        page = 1;
         beforeQuery = query;
-
 
         loadImage(query);
     }
-
 
     void getMoreImage() {
 
@@ -118,7 +115,7 @@ public class ImageGridViewModel extends BaseViewModel {
         isLoading.setValue(true);
 
         addDisposable(
-                repository.getImageList(query, ImageRequestType.ACCURACY, page)
+                repository.getImageList(query, requestType, page)
                         .subscribe(imageData -> {
                             Log.d("result", imageData.toString());
                             loadImageDataList.addAll(imageData.getDocuments());
@@ -132,9 +129,15 @@ public class ImageGridViewModel extends BaseViewModel {
         );
     }
 
+    void setFilterOption(ImageRequestType filterType) {
+        if (requestType != filterType) {
+            requestType = filterType;
+            getImage(beforeQuery, true);
+        }
+    }
 
     void saveDataToRepository() {
-        repository.saveRequestHeader(new RequestHeader(beforeQuery, ImageRequestType.ACCURACY, page));
+        repository.saveRequestHeader(new RequestHeader(beforeQuery, requestType, page));
         repository.saveImageList(imageDataList.getValue());
     }
 

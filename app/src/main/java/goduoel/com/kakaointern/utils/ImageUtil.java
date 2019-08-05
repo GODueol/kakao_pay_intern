@@ -31,7 +31,12 @@ public class ImageUtil {
             FileOutputStream out = new FileOutputStream(file);
             bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
             out.close();
-            bmpUri = FileProvider.getUriForFile(currentView.getContext(), "goduoel.com.kakaointern.provider", file);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                bmpUri = FileProvider.getUriForFile(currentView.getContext(), "goduoel.com.kakaointern.fileprovider", file);
+            }else{
+                bmpUri = Uri.fromFile(file);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -31,6 +31,7 @@ public class ImageDetailViewModel extends BaseViewModel {
 
     private int page;
     private String beforeQuery;
+    private ImageRequestType requestType;
 
     private ImageDetailViewModel(ImageRepository repository) {
         this.repository = repository;
@@ -42,6 +43,7 @@ public class ImageDetailViewModel extends BaseViewModel {
         RequestHeader requestHeader = repository.loadRequestHeader();
         page = requestHeader.getPage();
         beforeQuery = requestHeader.getQuery();
+        requestType = requestHeader.getSort();
         imageDataList.setValue(repository.loadImageList());
     }
 
@@ -83,7 +85,7 @@ public class ImageDetailViewModel extends BaseViewModel {
         isLoading.setValue(true);
 
         addDisposable(
-                repository.getImageList(beforeQuery, ImageRequestType.ACCURACY, page)
+                repository.getImageList(beforeQuery, requestType, page)
                         .subscribe(imageData -> {
                             Log.d("result", imageData.toString());
                             List<ImageDataResult.ImageDocument> loadImageDataList = imageDataList.getValue();
@@ -101,7 +103,7 @@ public class ImageDetailViewModel extends BaseViewModel {
     }
 
     void saveDataToRepository() {
-        repository.saveRequestHeader(new RequestHeader(beforeQuery, ImageRequestType.ACCURACY, page));
+        repository.saveRequestHeader(new RequestHeader(beforeQuery, requestType, page));
         repository.saveImageList(imageDataList.getValue());
     }
 

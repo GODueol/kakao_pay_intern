@@ -63,7 +63,7 @@ public class ImageGridRecyclerViewAdapter extends ListAdapter<ImageDataResult.Im
 
         @Override
         public boolean areContentsTheSame(@NonNull ImageDataResult.ImageDocument oldItem, @NonNull ImageDataResult.ImageDocument newItem) {
-            return oldItem.getDocUrl().equals(newItem.getDocUrl());
+            return oldItem.getImageUrl().equals(newItem.getImageUrl());
         }
     };
 
