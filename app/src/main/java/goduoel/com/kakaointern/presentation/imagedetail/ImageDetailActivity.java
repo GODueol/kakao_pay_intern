@@ -18,7 +18,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.view.ViewCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
@@ -35,6 +34,8 @@ import goduoel.com.kakaointern.presentation.BaseActivity;
 import goduoel.com.kakaointern.utils.Constants;
 import goduoel.com.kakaointern.utils.DownloadUtil;
 import goduoel.com.kakaointern.utils.ImageUtil;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding> {
 
@@ -42,6 +43,7 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     private int imageDocumentPosition;
     ImageDetailViewModel viewmodel;
 
+    private Disposable disposable;
     private int newPosition;
     private boolean isReturning = false;
 
@@ -90,18 +92,19 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         binding.overlayMenu.setOnShareListener(v -> {
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setType("image/*");
-            RecyclerView.LayoutManager linearLayout = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0)).getLayoutManager();
-            if (linearLayout == null) {
+            if (getCurrentGridITem() == null) {
                 return;
             }
-            View currentView = linearLayout.findViewByPosition(binding.viewpagerImageDetail.getCurrentItem());
-            if (currentView == null) {
-                return;
-            }
-            AppCompatImageView currentImageView = currentView.findViewById(R.id.detail_image);
-            Uri bmpUri = ImageUtil.getViewBitmapUri(currentImageView);
-            intent.putExtra(Intent.EXTRA_STREAM, bmpUri);
-            startActivity(Intent.createChooser(intent, getString(R.string.share)));
+            String url = getCurrentGridITem().getImageUrl();
+            disposable = ImageUtil.getViewBitmapUri(this, url)
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(uri -> {
+                        intent.putExtra(Intent.EXTRA_STREAM, uri);
+                        startActivity(Intent.createChooser(intent, getString(R.string.share)));
+                    }, e -> {
+                        Toast.makeText(this, "공유하기 실패", Toast.LENGTH_SHORT).show();
+                    });
+
         });
 
         binding.overlayMenu.setOnSiteListener(v -> {
@@ -127,6 +130,9 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
 
     @Override
     protected void onDestroy() {
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
         unregisterReceiver(onDownloadComplete);
         super.onDestroy();
     }

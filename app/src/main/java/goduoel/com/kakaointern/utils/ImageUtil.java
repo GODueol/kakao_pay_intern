@@ -1,30 +1,44 @@
 package goduoel.com.kakaointern.utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 
-import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.FileProvider;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 
 public class ImageUtil {
 
-    public static Uri getViewBitmapUri(AppCompatImageView currentView) {
-        Drawable drawable = currentView.getDrawable();
-        Bitmap bmp = null;
-        if (drawable instanceof BitmapDrawable) {
-            bmp = ((BitmapDrawable) currentView.getDrawable()).getBitmap();
-        } else {
-            return null;
-        }
-        Uri bmpUri = null;
-        try {
+    public static Single<Uri> getViewBitmapUri(Context context, String url) {
+
+        return Single.fromCallable(() -> {
+            Drawable drawable = Glide.with(context)
+                    .asDrawable()
+                    .load(url)
+                    .submit()
+                    .get();
+
+            Bitmap bmp = null;
+
+            if (drawable instanceof BitmapDrawable) {
+                bmp = ((BitmapDrawable) drawable).getBitmap();
+            }
+
+            Uri bmpUri;
             File file = new File(Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DOWNLOADS), "share_image_" + System.currentTimeMillis() + ".png");
             file.getParentFile().mkdirs();
@@ -32,14 +46,11 @@ public class ImageUtil {
             bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
             out.close();
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                bmpUri = FileProvider.getUriForFile(currentView.getContext(), "goduoel.com.kakaointern.fileprovider", file);
-            }else{
+                bmpUri = FileProvider.getUriForFile(context, "goduoel.com.kakaointern.fileprovider", file);
+            } else {
                 bmpUri = Uri.fromFile(file);
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bmpUri;
+            return bmpUri;
+        }).subscribeOn(Schedulers.io());
     }
 }

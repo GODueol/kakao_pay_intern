@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
@@ -38,7 +39,9 @@ import goduoel.com.kakaointern.utils.Constants;
 
 public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
 
+    private static final String EXTRA_FILTER_TYPE = "EXTRA_FILTER_TYPE";
     private ImageRequestType filterType = ImageRequestType.ACCURACY;
+    private ImageRequestType selectedType = ImageRequestType.ACCURACY;
     private Bundle reenterState = null;
 
     @Override
@@ -55,12 +58,22 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setSupportActionBar(binding.toolbar);
         setExitSharedElementCallback(exitElementCallback);
 
+        if (savedInstanceState != null) {
+            filterType = (ImageRequestType) savedInstanceState.getSerializable(EXTRA_FILTER_TYPE);
+        }
         initGridView();
         initViewModel();
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        // 검색 필터 저장
+        outState.putSerializable(EXTRA_FILTER_TYPE, filterType);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -171,16 +184,17 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
                 .setSingleChoiceItems(getResources().getStringArray(R.array.filter_list), filterType.ordinal(), (dialog, which) -> {
                     switch (which) {
                         case 0:
-                            filterType = ImageRequestType.ACCURACY;
+                            selectedType = ImageRequestType.ACCURACY;
                             break;
                         case 1:
-                            filterType = ImageRequestType.RECENCY;
+                            selectedType = ImageRequestType.RECENCY;
                             break;
                         default:
                             break;
                     }
                 })
                 .setPositiveButton("확인", (dialog, which) -> {
+                    filterType = selectedType;
                     binding.getImagegridVm().setFilterOption(filterType);
                     Log.d("TAG", "which : " + which);
                 }).setNegativeButton("취소", (dialog, which) -> {

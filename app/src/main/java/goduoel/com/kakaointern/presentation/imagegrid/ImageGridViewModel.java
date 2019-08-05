@@ -63,7 +63,9 @@ public class ImageGridViewModel extends BaseViewModel {
         RequestHeader requestHeader = repository.loadRequestHeader();
         page = requestHeader.getPage();
         beforeQuery = requestHeader.getQuery();
-        imageDataList.setValue(repository.loadImageList());
+        if (repository.loadImageList() != null) {
+            imageDataList.setValue(repository.loadImageList());
+        }
     }
 
     void getImage(String query, boolean isTypeChange) {
