@@ -21,7 +21,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:orientation="horizontal"
-            android:background="@color/colorBloack"
+            android:background="@color/colorBlack"
             app:items="@{imagedetailVm.imageDataList}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -1,5 +1,7 @@
 package goduoel.com.kakaointern.presentation.imagedetail;
 
+import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -7,13 +9,18 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.List;
 
@@ -26,25 +33,27 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
 
     private List<ImageDataResult.ImageDocument> itemList;
     private OnPagingScrollListener onPagingScrollListener;
-    private ImageDetailViewModel viewModel;
 
-    ImageDetailViewPagerAdapter(ImageDetailViewModel viewModel, OnPagingScrollListener onPagingScrollListener) {
+    private ImageDetailViewModel viewModel;
+    private int currentPosition;
+
+    ImageDetailViewPagerAdapter(ImageDetailViewModel viewModel, int currentPosition, OnPagingScrollListener onPagingScrollListener) {
         this.viewModel = viewModel;
+        this.currentPosition = currentPosition;
         this.onPagingScrollListener = onPagingScrollListener;
     }
 
     public void setItemList(List<ImageDataResult.ImageDocument> itemList) {
         this.itemList = itemList;
-        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_viewpager, parent, false);
-        ImageDetailViewPagerViewHolder viewHolder = new ImageDetailViewPagerViewHolder(itemView);
-        viewHolder.binding.setImagedetailVm(viewModel);
-        return viewHolder;
+        ImageDetailViewPagerViewHolder holder = new ImageDetailViewPagerViewHolder(itemView);
+        holder.binding.setImagedetailVm(viewModel);
+        return holder;
     }
 
     @Override
@@ -59,9 +68,36 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
             onPagingScrollListener.onLoadMore();
             return;
         }
+
         ImageDataResult.ImageDocument item = itemList.get(position);
-        holder.binding.setUrl(item.getImageUrl());
+        ViewCompat.setTransitionName(holder.itemView, item.getImageUrl());
+
+        Glide.with(holder.binding.detailImage)
+                .load(item.getImageUrl())
+                .fitCenter()
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        if (position == currentPosition) {
+                            ActivityCompat.startPostponedEnterTransition((Activity) holder.itemView.getContext());
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        if (position == currentPosition) {
+                            ActivityCompat.startPostponedEnterTransition((Activity) holder.itemView.getContext());
+                        }
+                        return false;
+                    }
+                })
+                .apply(new RequestOptions().error(R.drawable.img_load_fail))
+                .placeholder(R.drawable.img_load_image)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(holder.binding.detailImage);
     }
+
 
     @Override
     public int getItemCount() {
@@ -87,12 +123,7 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
         ImageDetailViewPagerViewHolder(View itemView) {
             super(itemView);
             binding = DataBindingUtil.bind(itemView);
-            binding.detailImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Log.d("test", "누름");
-                }
-            });
+            binding.detailImage.setOnClickListener(v -> Log.d("test", "누름"));
         }
 
     }

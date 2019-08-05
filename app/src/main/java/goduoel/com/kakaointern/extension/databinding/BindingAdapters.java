@@ -22,6 +22,7 @@ import java.util.List;
 import goduoel.com.kakaointern.R;
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.presentation.imagedetail.ImageDetailViewPagerAdapter;
+import goduoel.com.kakaointern.utils.UnitUtil;
 
 public class BindingAdapters {
 
@@ -58,14 +59,15 @@ public class BindingAdapters {
     }
 
 
-    @BindingAdapter({"uri","radius"})
-    public static void loadUrlImage(AppCompatImageView imageView, String imageUri,int radius) {
+    @BindingAdapter({"uri", "radius"})
+    public static void loadUrlImage(AppCompatImageView imageView, String imageUri, int radius) {
         if (imageUri == null)
             return;
 
+        int dpRadius = UnitUtil.convertDpToPixel(imageView.getContext(), radius);
         Glide.with(imageView).load(imageUri)
                 .fitCenter()
-                .apply(new RequestOptions().transform(new RoundedCorners(radius)).error(R.drawable.img_load_fail))
+                .apply(new RequestOptions().transform(new RoundedCorners(dpRadius)).error(R.drawable.img_load_fail))
                 .placeholder(R.drawable.img_load_image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imageView);

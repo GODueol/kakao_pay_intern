@@ -14,7 +14,7 @@
         android:id="@+id/thumbnail_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:radius="@{24}"
+        app:radius="@{8}"
         app:uri="@{url}"
         tools:src="@drawable/img_load_image" />
 </layout>

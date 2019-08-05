@@ -7,7 +7,6 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -21,6 +20,7 @@ public class OverlayMenuView extends ConstraintLayout {
     private OnClickListener onShareListener;
     private OnClickListener onDownListener;
     private OnClickListener onSiteListener;
+    private OnClickListener onBackListner;
 
 
     public OverlayMenuView(Context context) {
@@ -52,6 +52,12 @@ public class OverlayMenuView extends ConstraintLayout {
         binder.btnSite.setOnClickListener(v -> {
             if (onSiteListener != null) {
                 onSiteListener.onClick(v);
+            }
+        });
+
+        binder.btnBack.setOnClickListener(v -> {
+            if (onBackListner != null) {
+                onBackListner.onClick(v);
             }
         });
     }
@@ -111,6 +117,13 @@ public class OverlayMenuView extends ConstraintLayout {
 
     }
 
+    public void enableButtons(boolean enable) {
+        binder.btnSite.setEnabled(enable);
+        binder.btnShare.setEnabled(enable);
+        binder.btnDownload.setEnabled(enable);
+    }
+
+
     public void setOnShareListener(OnClickListener onShareListener) {
         this.onShareListener = onShareListener;
     }
@@ -121,6 +134,10 @@ public class OverlayMenuView extends ConstraintLayout {
 
     public void setOnSiteListener(OnClickListener onSiteListener) {
         this.onSiteListener = onSiteListener;
+    }
+
+    public void setOnBackListner(OnClickListener onBackListner) {
+        this.onBackListner = onBackListner;
     }
 
 }

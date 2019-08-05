@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import goduoel.com.kakaointern.R;
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.databinding.ItemGridBinding;
-import goduoel.com.kakaointern.presentation.listener.OnPagingScrollListener;
 import goduoel.com.kakaointern.presentation.listener.OnItemClickListener;
+import goduoel.com.kakaointern.presentation.listener.OnPagingScrollListener;
 
 public class ImageGridRecyclerViewAdapter extends ListAdapter<ImageDataResult.ImageDocument, ImageGridRecyclerViewAdapter.ImageGridAdapterViewHolder> {
 
@@ -35,7 +35,7 @@ public class ImageGridRecyclerViewAdapter extends ListAdapter<ImageDataResult.Im
 
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_grid, parent, false);
         ImageGridAdapterViewHolder holder = new ImageGridAdapterViewHolder(itemView);
-        holder.binding.getRoot().setOnClickListener(view -> onItemClickListener.onItemClick(view, holder.getAdapterPosition()));
+        itemView.setOnClickListener(v -> onItemClickListener.onItemClick(v, holder.getAdapterPosition()));
         return holder;
     }
 
@@ -48,10 +48,7 @@ public class ImageGridRecyclerViewAdapter extends ListAdapter<ImageDataResult.Im
 
         ImageDataResult.ImageDocument item = getItem(position);
         holder.binding.setUrl(item.getThumbnailUrl());
-        if (ViewCompat.getTransitionName(holder.binding.thumbnailImage) == null) {
-            ViewCompat.setTransitionName(holder.binding.thumbnailImage, item.getImageUrl());
-        }
-
+        ViewCompat.setTransitionName(holder.itemView, item.getImageUrl());
         if (position == getItemCount() - 5) {
             onPagingScrollListener.onLoadMore();
         }

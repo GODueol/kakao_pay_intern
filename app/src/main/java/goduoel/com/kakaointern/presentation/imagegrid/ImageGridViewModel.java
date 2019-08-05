@@ -59,7 +59,7 @@ public class ImageGridViewModel extends BaseViewModel {
         return isEndData;
     }
 
-    public void loadRepositoryData() {
+    void loadRepositoryData() {
         RequestHeader requestHeader = repository.loadRequestHeader();
         page = requestHeader.getPage();
         beforeQuery = requestHeader.getQuery();

@@ -60,8 +60,11 @@ dependencies {
     // videwmodel
     implementation "androidx.lifecycle:lifecycle-extensions:2.0.0"
 
-
+    // photoview
     implementation 'com.github.chrisbanes:PhotoView:2.3.0'
+
+    // lottie
+    implementation 'com.airbnb.android:lottie:3.0.7'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
