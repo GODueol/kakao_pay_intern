@@ -12,10 +12,8 @@ import java.util.Objects;
 public class ImageDataResult {
 
     @SerializedName("meta")
-    @Expose
     private ImageMeta meta;
     @SerializedName("documents")
-    @Expose
     private List<ImageDocument> documents = null;
 
     public ImageMeta getMeta() {
@@ -60,13 +58,10 @@ public class ImageDataResult {
     public static class ImageMeta {
 
         @SerializedName("total_count")
-        @Expose
         private Integer totalCount;
         @SerializedName("pageable_count")
-        @Expose
         private Integer pageableCount;
         @SerializedName("is_end")
-        @Expose
         private Boolean isEnd;
 
         public Integer getTotalCount() {
@@ -122,28 +117,20 @@ public class ImageDataResult {
     public static class ImageDocument implements Parcelable {
 
         @SerializedName("collection")
-        @Expose
         private String collection;
         @SerializedName("thumbnail_url")
-        @Expose
         private String thumbnailUrl;
         @SerializedName("image_url")
-        @Expose
         private String imageUrl;
         @SerializedName("width")
-        @Expose
         private Integer width;
         @SerializedName("height")
-        @Expose
         private Integer height;
         @SerializedName("display_sitename")
-        @Expose
         private String displaySitename;
         @SerializedName("doc_url")
-        @Expose
         private String docUrl;
         @SerializedName("datetime")
-        @Expose
         private String datetime;
 
         protected ImageDocument(Parcel in) {

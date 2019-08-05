@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.view.ViewCompat;
@@ -87,6 +88,10 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         if (extras != null) {
             imageDocumentPosition = extras.getInt(Constants.EXTRA_IMAGE_POSITION);
         }
+        if (savedInstanceState != null) {
+            int savePosition = savedInstanceState.getInt(Constants.EXTRA_IMAGE_POSITION, -1);
+            imageDocumentPosition = savePosition != -1 ? savePosition : imageDocumentPosition;
+        }
         registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         initViewModel();
         initView();
@@ -138,13 +143,20 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     }
 
     @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        // 화면 전환 페이지 저장
+        outState.putInt(Constants.EXTRA_IMAGE_POSITION, binding.viewpagerImageDetail.getCurrentItem());
+        super.onSaveInstanceState(outState);
+    }
+
+
+    @Override
     protected void onDestroy() {
         unregisterReceiver(onDownloadComplete);
         super.onDestroy();
     }
 
     private void initViewPager() {
-        binding.viewpagerImageDetail.setPageTransformer((page, position) -> binding.overlayMenu.enableButtons(false));
         binding.viewpagerImageDetail.setAdapter(new ImageDetailViewPagerAdapter(viewmodel, imageDocumentPosition, () -> binding.getImagedetailVm().getMoreImage()));
         binding.viewpagerImageDetail.post(() -> binding.viewpagerImageDetail.setCurrentItem(imageDocumentPosition, false));
     }

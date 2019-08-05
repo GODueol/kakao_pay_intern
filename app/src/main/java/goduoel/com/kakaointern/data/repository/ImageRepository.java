@@ -5,6 +5,7 @@ import java.util.List;
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.data.entity.ImageRequestType;
 import goduoel.com.kakaointern.data.entity.RequestHeader;
+import goduoel.com.kakaointern.utils.Constants;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -32,7 +33,7 @@ public class ImageRepository implements ImageDataSource {
         cacheRequestHeader.setSort(sort);
         cacheRequestHeader.setPage(page);
         return ImageService.getInstance().api
-                .getImageList(query, sort.getType(), page, 80)
+                .getImageList(query, sort.getType(), page, Constants.REQUEST_DEFAULT_PAGE)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
     }
