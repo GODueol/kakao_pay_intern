@@ -8,6 +8,9 @@
         <variable
             name="url"
             type="String" />
+        <variable
+            name="imagedetailVm"
+            type="goduoel.com.kakaointern.presentation.imagedetail.ImageDetailViewModel" />
     </data>
 
     <com.github.chrisbanes.photoview.PhotoView
@@ -15,5 +18,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:uri="@{url}"
-        tools:src="@drawable/img_load_image" />
+        tools:src="@drawable/img_load_image"
+        android:onClickListener="@{() -> imagedetailVm.showAndHideMenu()}"/>
 </layout>

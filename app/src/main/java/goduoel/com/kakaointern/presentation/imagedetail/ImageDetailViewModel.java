@@ -8,6 +8,8 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.github.chrisbanes.photoview.PhotoView;
+
 import java.util.List;
 
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
@@ -27,12 +29,14 @@ public class ImageDetailViewModel extends BaseViewModel {
     @NonNull
     private final MutableLiveData<Boolean> isEndData = new MutableLiveData<>();
 
+    @NonNull
+    private final MutableLiveData<Boolean> menuShowAndHide = new MutableLiveData<>();
+
     private int page;
     private String beforeQuery;
 
     private ImageDetailViewModel(ImageRepository repository) {
         this.repository = repository;
-
         initViewData();
         loadRepositoryData();
     }
@@ -45,6 +49,7 @@ public class ImageDetailViewModel extends BaseViewModel {
     }
 
     private void initViewData() {
+        menuShowAndHide.setValue(false);
         isLoading.setValue(false);
         isEndData.setValue(false);
     }
@@ -62,6 +67,12 @@ public class ImageDetailViewModel extends BaseViewModel {
     @NonNull
     LiveData<Boolean> getIsEndData() {
         return isEndData;
+    }
+
+
+    @NonNull
+    public LiveData<Boolean> getMenuShowAndHide() {
+        return menuShowAndHide;
     }
 
     void getMoreImage() {
@@ -93,6 +104,11 @@ public class ImageDetailViewModel extends BaseViewModel {
     void saveDataToRepository() {
         repository.saveRequestHeader(new RequestHeader(beforeQuery, ImageRequestType.ACCURACY, page));
         repository.saveImageList(imageDataList.getValue());
+    }
+
+    public void showAndHideMenu() {
+        boolean isShow = menuShowAndHide.getValue();
+        menuShowAndHide.setValue(!isShow);
     }
 
     public static class Factory implements ViewModelProvider.Factory {

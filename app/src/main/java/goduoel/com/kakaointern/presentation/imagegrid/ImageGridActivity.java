@@ -1,15 +1,21 @@
 package goduoel.com.kakaointern.presentation.imagegrid;
 
+import android.animation.LayoutTransition;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MenuItemCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -50,23 +56,52 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
 
     private void initMenuView(Menu menu) {
         MenuItem searchMenu = menu.findItem(R.id.image_search);
+        searchMenu.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
 
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                if (getSupportActionBar() != null) {
+                    ColorDrawable whiteColor = new ColorDrawable(ContextCompat.getColor(ImageGridActivity.this, R.color.colorWhite));
+                    getSupportActionBar().setBackgroundDrawable(whiteColor);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                if (getSupportActionBar() != null) {
+                    ColorDrawable primaryColor = new ColorDrawable(ContextCompat.getColor(ImageGridActivity.this, R.color.colorPrimary));
+                    getSupportActionBar().setBackgroundDrawable(primaryColor);
+                }
+                return true;
+            }
+        });
+
+        initSearchView(searchMenu);
+    }
+
+    private void initSearchView(MenuItem searchMenu) {
         SearchView searchView = (SearchView) searchMenu.getActionView();
-
         searchView.setQueryHint(getString(R.string.image_search_hint));
         searchView.setMaxWidth(Integer.MAX_VALUE);
+
+        LinearLayout searchBar = searchView.findViewById(androidx.appcompat.R.id.search_bar);
+        searchBar.setLayoutTransition(new LayoutTransition());
+        searchBar.setBackgroundColor(ContextCompat.getColor(this, R.color.colorWhite));
+        View underline = searchView.findViewById(androidx.appcompat.R.id.search_plate);
+        underline.setBackgroundColor(Color.TRANSPARENT);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 binding.getImagegridVm().getImage(query);
                 searchView.clearFocus();
-//                KeyboardUtil.closeKeyboard(getBaseContext());
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return false;
+                binding.appBar.setExpanded(true);
+                return true;
             }
         });
     }
@@ -80,6 +115,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
         }
 
         binding.recyclerGirdIamge.setLayoutManager(new GridLayoutManager(this, spanCount));
+        binding.recyclerGirdIamge.addItemDecoration(new GridEqualSpacingItemDecoration(spanCount, 4));
         binding.recyclerGirdIamge.setAdapter(
                 new ImageGridRecyclerViewAdapter((sharedImageView, position) -> {
                     saveToPassData();

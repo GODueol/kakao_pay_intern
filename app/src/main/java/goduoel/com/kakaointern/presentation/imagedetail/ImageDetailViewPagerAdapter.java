@@ -1,5 +1,6 @@
 package goduoel.com.kakaointern.presentation.imagedetail;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +26,10 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
 
     private List<ImageDataResult.ImageDocument> itemList;
     private OnPagingScrollListener onPagingScrollListener;
+    private ImageDetailViewModel viewModel;
 
-    ImageDetailViewPagerAdapter(OnPagingScrollListener onPagingScrollListener) {
+    ImageDetailViewPagerAdapter(ImageDetailViewModel viewModel, OnPagingScrollListener onPagingScrollListener) {
+        this.viewModel = viewModel;
         this.onPagingScrollListener = onPagingScrollListener;
     }
 
@@ -39,7 +42,9 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
     @Override
     public ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_viewpager, parent, false);
-        return new ImageDetailViewPagerViewHolder(itemView);
+        ImageDetailViewPagerViewHolder viewHolder = new ImageDetailViewPagerViewHolder(itemView);
+        viewHolder.binding.setImagedetailVm(viewModel);
+        return viewHolder;
     }
 
     @Override
@@ -82,6 +87,12 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
         ImageDetailViewPagerViewHolder(View itemView) {
             super(itemView);
             binding = DataBindingUtil.bind(itemView);
+            binding.detailImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d("test", "누름");
+                }
+            });
         }
 
     }

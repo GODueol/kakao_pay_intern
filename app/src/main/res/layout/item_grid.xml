@@ -2,14 +2,19 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <data>
-        <variable name="url" type="String"/>
+
+        <variable
+            name="url"
+            type="String" />
     </data>
 
     <goduoel.com.kakaointern.presentation.imagegrid.SquareView
         android:id="@+id/thumbnail_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:src="@drawable/img_load_image"
-        app:uri="@{url}"/>
+        app:radius="@{24}"
+        app:uri="@{url}"
+        tools:src="@drawable/img_load_image" />
 </layout>

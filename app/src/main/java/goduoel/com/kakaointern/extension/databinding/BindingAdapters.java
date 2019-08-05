@@ -12,6 +12,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.github.chrisbanes.photoview.PhotoView;
 
@@ -51,6 +52,20 @@ public class BindingAdapters {
         Glide.with(imageView).load(imageUri)
                 .fitCenter()
                 .apply(new RequestOptions().error(R.drawable.img_load_fail))
+                .placeholder(R.drawable.img_load_image)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(imageView);
+    }
+
+
+    @BindingAdapter({"uri","radius"})
+    public static void loadUrlImage(AppCompatImageView imageView, String imageUri,int radius) {
+        if (imageUri == null)
+            return;
+
+        Glide.with(imageView).load(imageUri)
+                .fitCenter()
+                .apply(new RequestOptions().transform(new RoundedCorners(radius)).error(R.drawable.img_load_fail))
                 .placeholder(R.drawable.img_load_image)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imageView);
