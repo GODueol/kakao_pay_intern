@@ -88,8 +88,6 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
 
         if (resultCode == BaseActivity.RESULT_OK) {
             reenterState = new Bundle(data.getExtras());
-            binding.getImagegridVm().loadRepositoryData();
-
             int position = data.getIntExtra(ImageDetailActivity.EXTRA_CURRENT_POSITION, 0);
             syncRecyclerViewScroll(position);
         }
@@ -106,8 +104,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
         binding.recyclerGirdIamge.addItemDecoration(new GridEqualSpacingItemDecoration(spanCount, 4));
         binding.recyclerGirdIamge.setAdapter(
                 new ImageGridRecyclerViewAdapter((sharedElement, position) -> {
-                    binding.appBar.setExpanded(false);
-                    overridePendingTransition(0, 0);
+                    appBarExpand(false);
                     saveToPassData();
                     Intent intent = new Intent(this, ImageDetailActivity.class);
                     intent.putExtra(Constants.EXTRA_IMAGE_POSITION, position);
@@ -125,7 +122,6 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
                 }, () -> binding.getImagegridVm().getMoreImage(false))
         );
     }
-
 
     private void initViewModel() {
         ViewModelProvider.Factory factory = new ImageGridViewModel.Factory(ImageRepository.getInstance());
@@ -239,7 +235,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                binding.appBar.setExpanded(true);
+                appBarExpand(true);
                 return true;
             }
         });
@@ -248,6 +244,10 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
 
     private void saveToPassData() {
         binding.getImagegridVm().saveDataToRepository();
+    }
+
+    private void appBarExpand(boolean expanded) {
+        binding.appBar.setExpanded(expanded);
     }
 
     private void syncRecyclerViewScroll(int position) {
@@ -306,8 +306,6 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
             }
         }
     };
-
-
 }
 
 

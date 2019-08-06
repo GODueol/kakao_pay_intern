@@ -4,7 +4,6 @@ import java.util.List;
 
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.data.entity.ImageRequestType;
-import goduoel.com.kakaointern.data.entity.RequestHeader;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
@@ -15,10 +14,6 @@ interface ImageDataSource {
     Observable<Throwable> handleError();
 
     void saveImageList(List<ImageDataResult.ImageDocument> list);
-
-    void saveRequestHeader(RequestHeader query);
-
-    RequestHeader loadRequestHeader();
 
     List<ImageDataResult.ImageDocument> loadImageList();
 }

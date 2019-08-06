@@ -71,7 +71,7 @@ public class BindingAdapters {
         Glide.with(imageView).load(imageUri)
                 .fitCenter()
                 .apply(new RequestOptions().transform(new RoundedCorners(dpRadius)).error(R.drawable.img_load_fail))
-                .placeholder(R.drawable.img_load_image)
+                .placeholder(R.drawable.ic_loading)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imageView);
     }

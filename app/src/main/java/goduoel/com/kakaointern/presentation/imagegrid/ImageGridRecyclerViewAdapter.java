@@ -50,7 +50,7 @@ public class ImageGridRecyclerViewAdapter extends ListAdapter<ImageDataResult.Im
         holder.binding.setUrl(item.getThumbnailUrl());
         ViewCompat.setTransitionName(holder.itemView, item.getImageUrl());
         if (position == getItemCount() - 5) {
-//            onPagingScrollListener.onLoadMore();
+            onPagingScrollListener.onLoadMore();
         }
     }
 

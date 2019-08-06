@@ -14,7 +14,6 @@ import java.util.List;
 
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.data.entity.ImageRequestType;
-import goduoel.com.kakaointern.data.entity.RequestHeader;
 import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.presentation.BaseViewModel;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -74,15 +73,6 @@ public class ImageGridViewModel extends BaseViewModel {
     @NonNull
     public LiveData<Throwable> getError() {
         return error;
-    }
-
-    void loadRepositoryData() {
-        RequestHeader requestHeader = repository.loadRequestHeader();
-        page = requestHeader.getPage();
-        beforeQuery = requestHeader.getQuery();
-        if (repository.loadImageList() != null) {
-            imageDataList.setValue(repository.loadImageList());
-        }
     }
 
     void getImage(String query, boolean isTypeChange) {
@@ -156,7 +146,6 @@ public class ImageGridViewModel extends BaseViewModel {
     }
 
     void saveDataToRepository() {
-        repository.saveRequestHeader(new RequestHeader(beforeQuery, requestType, page));
         repository.saveImageList(imageDataList.getValue());
     }
 
