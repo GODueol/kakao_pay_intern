@@ -211,6 +211,8 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
 
                         if (status == DownloadManager.STATUS_SUCCESSFUL) {
                             Toast.makeText(ImageDetailActivity.this, "다운로드 완료", Toast.LENGTH_SHORT).show();
+                        } else if (status == DownloadManager.STATUS_FAILED) {
+                            Toast.makeText(ImageDetailActivity.this, "다운로드 실패", Toast.LENGTH_SHORT).show();
                         }
                     }
                 }

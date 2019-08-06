@@ -20,7 +20,6 @@
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_back"
                 style="@style/Button.MenuIcon"
-                android:layout_weight="1"
                 app:icon="@drawable/btn_back"
                 app:iconGravity="start" />
         </LinearLayout>
@@ -39,15 +38,13 @@
                 android:id="@+id/btn_download"
                 style="@style/Button.MenuIcon"
                 android:layout_weight="1"
-                app:icon="@drawable/btn_down"
-                app:iconGravity="textStart" />
+                app:icon="@drawable/btn_down" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_site"
                 style="@style/Button.MenuIcon"
                 android:layout_weight="1"
-                app:icon="@drawable/btn_web_stie"
-                app:iconGravity="textStart" />
+                app:icon="@drawable/btn_web_stie" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_share"
