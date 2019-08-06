@@ -15,6 +15,7 @@ import goduoel.com.kakaointern.data.entity.ImageRequestType;
 import goduoel.com.kakaointern.data.entity.RequestHeader;
 import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.presentation.BaseViewModel;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class ImageDetailViewModel extends BaseViewModel {
 
@@ -28,15 +29,31 @@ public class ImageDetailViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> isEndData = new MutableLiveData<>();
     @NonNull
     private final MutableLiveData<Boolean> menuShowAndHide = new MutableLiveData<>();
+    @NonNull
+    private final MutableLiveData<Throwable> error = new MutableLiveData<>();
 
     private int page;
     private String beforeQuery;
     private ImageRequestType requestType;
 
+    @NonNull
+    public LiveData<Throwable> getError() {
+        return error;
+    }
+
     private ImageDetailViewModel(ImageRepository repository) {
         this.repository = repository;
         initViewData();
         loadRepositoryData();
+        initHandleError();
+    }
+
+    private void initHandleError() {
+        addDisposable(repository.handleError()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(error::setValue, ignore -> {
+                })
+        );
     }
 
     private void loadRepositoryData() {
@@ -68,24 +85,26 @@ public class ImageDetailViewModel extends BaseViewModel {
         return isEndData;
     }
 
-
     @NonNull
     LiveData<Boolean> getMenuShowAndHide() {
         return menuShowAndHide;
     }
 
-    void getMoreImage() {
+    void getMoreImage(boolean isRetry) {
 
         if (isLoading.getValue() != null && isLoading.getValue()) {
             return;
         }
 
-        page++;
+        if (!isRetry) {
+            page++;
+        }
 
         isLoading.setValue(true);
 
         addDisposable(
                 repository.getImageList(beforeQuery, requestType, page)
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(imageData -> {
                             Log.d("result", imageData.toString());
                             List<ImageDataResult.ImageDocument> loadImageDataList = imageDataList.getValue();
@@ -95,10 +114,7 @@ public class ImageDetailViewModel extends BaseViewModel {
                             imageDataList.setValue(loadImageDataList);
                             isEndData.setValue(imageData.getMeta().getIsEnd());
                             isLoading.setValue(false);
-                        }, e -> {
-                            Log.e("error", e.getMessage());
-                            isLoading.setValue(false);
-                        })
+                        }, e -> isLoading.setValue(false))
         );
     }
 

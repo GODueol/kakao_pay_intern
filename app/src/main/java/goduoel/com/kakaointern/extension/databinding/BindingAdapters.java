@@ -28,7 +28,7 @@ public class BindingAdapters {
 
     @SuppressWarnings("unchecked")
     @BindingAdapter({"items"})
-    public static <T, VH extends RecyclerView.ViewHolder> void setItems(
+    public static <T, VH extends RecyclerView.ViewHolder> void setRecyclerViewItems(
             @NonNull final RecyclerView recyclerView,
             @Nullable final List<T> items) {
         final ListAdapter<T, VH> adapter = (ListAdapter<T, VH>) recyclerView.getAdapter();
@@ -37,11 +37,14 @@ public class BindingAdapters {
         }
     }
 
-    @BindingAdapter("items")
-    public static void bindItem(ViewPager2 viewPager2, List<ImageDataResult.ImageDocument> items) {
-        ImageDetailViewPagerAdapter adapter = (ImageDetailViewPagerAdapter) viewPager2.getAdapter();
+    @SuppressWarnings("unchecked")
+    @BindingAdapter({"items"})
+    public static <T, VH extends RecyclerView.ViewHolder> void setViewpagerItems(
+            @NonNull final ViewPager2 viewPager2,
+            @Nullable final List<T> items) {
+        final ListAdapter<T, VH> adapter = (ListAdapter<T, VH>) viewPager2.getAdapter();
         if (adapter != null) {
-            adapter.setItemList(items);
+            adapter.submitList(items == null ? null : new ArrayList<>(items));
         }
     }
 

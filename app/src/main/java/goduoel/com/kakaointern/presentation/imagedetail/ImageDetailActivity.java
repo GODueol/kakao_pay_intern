@@ -23,11 +23,14 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.List;
 import java.util.Map;
 
 import goduoel.com.kakaointern.R;
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
+import goduoel.com.kakaointern.data.error.RetryException;
 import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.databinding.ActivityImageDetailBinding;
 import goduoel.com.kakaointern.presentation.BaseActivity;
@@ -101,9 +104,7 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
                     .subscribe(uri -> {
                         intent.putExtra(Intent.EXTRA_STREAM, uri);
                         startActivity(Intent.createChooser(intent, getString(R.string.share)));
-                    }, e -> {
-                        Toast.makeText(this, "공유하기 실패", Toast.LENGTH_SHORT).show();
-                    });
+                    }, e -> Toast.makeText(this, getString(R.string.share_fail), Toast.LENGTH_SHORT).show());
 
         });
 
@@ -138,7 +139,7 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     }
 
     private void initViewPager() {
-        binding.viewpagerImageDetail.setAdapter(new ImageDetailViewPagerAdapter(viewmodel, imageDocumentPosition, () -> binding.getImagedetailVm().getMoreImage()));
+        binding.viewpagerImageDetail.setAdapter(new ImageDetailViewPagerAdapter(viewmodel, imageDocumentPosition, () -> binding.getImagedetailVm().getMoreImage(false)));
         binding.viewpagerImageDetail.post(() -> binding.viewpagerImageDetail.setCurrentItem(imageDocumentPosition, false));
     }
 
@@ -150,6 +151,24 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     }
 
     private void observeLiveData() {
+
+        binding.getImagedetailVm().getError().observe(this, e -> {
+            if (e instanceof RetryException) {
+                switch (((RetryException) e).getRetryType()) {
+                    case RETRY_REQUEST:
+                        Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        break;
+                    case RETRY_FAIL:
+                        Snackbar snackbar = Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_INDEFINITE);
+                        snackbar.setAction("Yes", view -> binding.getImagedetailVm().getMoreImage(true));
+                        snackbar.show();
+                        break;
+                }
+                return;
+            }
+            Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
+        });
+
         binding.getImagedetailVm().getImageDataList().observe(this, imageDocuments -> Log.e(TAG, imageDocuments.toString()));
 
         binding.getImagedetailVm().getIsLoading().observe(this, bool ->
@@ -197,7 +216,7 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     private ImageDataResult.ImageDocument getCurrentGridITem() {
         ImageDetailViewPagerAdapter imageDetailViewPagerAdapter =
                 ((ImageDetailViewPagerAdapter) binding.viewpagerImageDetail.getAdapter());
-        return imageDetailViewPagerAdapter != null ? imageDetailViewPagerAdapter.getItem(binding.viewpagerImageDetail.getCurrentItem()) : null;
+        return imageDetailViewPagerAdapter != null ? imageDetailViewPagerAdapter.getCurrentList().get(binding.viewpagerImageDetail.getCurrentItem()) : null;
     }
 
     private void beginDownload(String url) {

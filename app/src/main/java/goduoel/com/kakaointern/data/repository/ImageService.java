@@ -12,7 +12,8 @@ import retrofit2.http.Query;
 class ImageService {
 
     private static final String HOST = "https://dapi.kakao.com/";
-    API api;
+
+    private imageSearchService imageSearchService;
 
 
     private ImageService() {
@@ -25,7 +26,7 @@ class ImageService {
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
-        api = retrofit.create(API.class);
+        imageSearchService = retrofit.create(imageSearchService.class);
     }
 
     static ImageService getInstance() {
@@ -36,7 +37,11 @@ class ImageService {
         static final ImageService INSTANCE = new ImageService();
     }
 
-    interface API {
+    public imageSearchService getImageSearchService() {
+        return imageSearchService;
+    }
+    
+    interface imageSearchService {
         @GET("v2/search/image")
         @Headers("Authorization:KakaoAK 41f6c29216f4c9bd522e7e09434ebdfa")
         Single<ImageDataResult> getImageList(@Query("query") String qeury, @Query("sort") String sorty, @Query("page") int page, @Query("size") int size);

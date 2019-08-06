@@ -12,6 +12,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -22,29 +24,23 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 
-import java.util.List;
-
 import goduoel.com.kakaointern.R;
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.databinding.ItemViewpagerBinding;
 import goduoel.com.kakaointern.presentation.listener.OnPagingScrollListener;
 
-public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder> {
+public class ImageDetailViewPagerAdapter extends ListAdapter<ImageDataResult.ImageDocument, ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder> {
 
-    private List<ImageDataResult.ImageDocument> itemList;
     private OnPagingScrollListener onPagingScrollListener;
 
     private ImageDetailViewModel viewModel;
     private int currentPosition;
 
     ImageDetailViewPagerAdapter(ImageDetailViewModel viewModel, int currentPosition, OnPagingScrollListener onPagingScrollListener) {
+        super(DIFF_CALLBACK);
         this.viewModel = viewModel;
         this.currentPosition = currentPosition;
         this.onPagingScrollListener = onPagingScrollListener;
-    }
-
-    public void setItemList(List<ImageDataResult.ImageDocument> itemList) {
-        this.itemList = itemList;
     }
 
     @NonNull
@@ -59,7 +55,7 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
     @Override
     public void onBindViewHolder(@NonNull ImageDetailViewPagerAdapter.ImageDetailViewPagerViewHolder holder, int position) {
 
-        if (position >= itemList.size()) {
+        if (position >= getCurrentList().size()) {
             Glide.with(holder.binding.detailImage).load(R.drawable.img_load_image)
                     .fitCenter()
                     .apply(new RequestOptions().error(R.drawable.img_load_fail))
@@ -69,7 +65,7 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
             return;
         }
 
-        ImageDataResult.ImageDocument item = itemList.get(position);
+        ImageDataResult.ImageDocument item = getCurrentList().get(position);
         ViewCompat.setTransitionName(holder.itemView, item.getImageUrl());
 
         Glide.with(holder.binding.detailImage)
@@ -101,21 +97,23 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
 
     @Override
     public int getItemCount() {
-        if (itemList == null)
-            return 0;
-
-        return itemList.size() + 1;
+        return getCurrentList().size() + 1;
     }
 
-    @Nullable
-    ImageDataResult.ImageDocument getItem(int position) {
-        if (itemList == null) {
-            return null;
-        } else if (itemList.size() <= position) {
-            return null;
+
+    private static DiffUtil.ItemCallback<ImageDataResult.ImageDocument> DIFF_CALLBACK = new DiffUtil.ItemCallback<ImageDataResult.ImageDocument>() {
+
+        @Override
+        public boolean areItemsTheSame(@NonNull ImageDataResult.ImageDocument oldItem, @NonNull ImageDataResult.ImageDocument newItem) {
+            return oldItem.equals(newItem);
         }
-        return itemList.get(position);
-    }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull ImageDataResult.ImageDocument oldItem, @NonNull ImageDataResult.ImageDocument newItem) {
+            return oldItem.getImageUrl().equals(newItem.getImageUrl());
+        }
+    };
+
 
     static class ImageDetailViewPagerViewHolder extends RecyclerView.ViewHolder {
         ItemViewpagerBinding binding;
@@ -127,6 +125,5 @@ public class ImageDetailViewPagerAdapter extends RecyclerView.Adapter<ImageDetai
                 binding.detailImage.setOnClickListener(v -> Log.d("test", "누름"));
             }
         }
-
     }
 }

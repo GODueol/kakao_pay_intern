@@ -5,7 +5,7 @@ public enum ImageRequestType {
 
     private String type;
 
-    private ImageRequestType(String type) {
+    ImageRequestType(String type) {
         this.type = type;
     }
 

@@ -16,6 +16,16 @@ public class ImageDataResult {
     @SerializedName("documents")
     private List<ImageDocument> documents = null;
 
+    private String errorMessage;
+
+    public ImageDataResult() {
+
+    }
+
+    public ImageDataResult(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
     public ImageMeta getMeta() {
         return meta;
     }
@@ -52,6 +62,14 @@ public class ImageDataResult {
                 "meta=" + meta +
                 ", documents=" + documents +
                 '}';
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
 

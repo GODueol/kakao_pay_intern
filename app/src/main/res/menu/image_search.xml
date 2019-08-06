@@ -5,6 +5,7 @@
         android:id="@+id/image_search"
         android:icon="@android:drawable/ic_menu_search"
         android:title="@string/search"
+        app:iconifiedByDefault="false"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="always|collapseActionView" />
 
@@ -13,5 +14,5 @@
         android:icon="@drawable/btn_filter"
         android:title=""
         android:visible="false"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
 </menu>

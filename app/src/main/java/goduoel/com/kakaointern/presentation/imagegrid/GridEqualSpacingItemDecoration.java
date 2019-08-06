@@ -21,17 +21,17 @@ public class GridEqualSpacingItemDecoration extends RecyclerView.ItemDecoration 
 
     @Override
     public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-        int position = parent.getChildAdapterPosition(view); // item position
-        int column = position % spanCount; // item column
+        int position = parent.getChildAdapterPosition(view);
+        int column = position % spanCount;
         int spacingPx = UnitUtil.convertDpToPixel(parent.getContext(), spacingDp);
-        
-        outRect.left = spacingPx - column * spacingPx / spanCount; // spacing - column * ((1f / spanCount) * spacing)
-        outRect.right = (column + 1) * spacingPx / spanCount; // (column + 1) * ((1f / spanCount) * spacing)
 
-        if (position < spanCount) { // top edge
+        outRect.left = spacingPx - column * spacingPx / spanCount;
+        outRect.right = (column + 1) * spacingPx / spanCount;
+
+        if (position < spanCount) {
             outRect.top = spacingPx;
         }
-        outRect.bottom = spacingPx; // item bottom
+        outRect.bottom = spacingPx;
 
     }
 }

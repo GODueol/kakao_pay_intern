@@ -17,6 +17,7 @@ import goduoel.com.kakaointern.data.entity.ImageRequestType;
 import goduoel.com.kakaointern.data.entity.RequestHeader;
 import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.presentation.BaseViewModel;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class ImageGridViewModel extends BaseViewModel {
 
@@ -28,6 +29,8 @@ public class ImageGridViewModel extends BaseViewModel {
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     @NonNull
     private final MutableLiveData<Boolean> isEndData = new MutableLiveData<>();
+    @NonNull
+    private final MutableLiveData<Throwable> error = new MutableLiveData<>();
 
     private ImageRequestType requestType = ImageRequestType.ACCURACY;
     private String beforeQuery = "";
@@ -36,6 +39,15 @@ public class ImageGridViewModel extends BaseViewModel {
     private ImageGridViewModel(ImageRepository repository) {
         this.repository = repository;
         initViewData();
+        initHandleError();
+    }
+
+    private void initHandleError() {
+        addDisposable(repository.handleError()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(error::setValue, ignore -> {
+                })
+        );
     }
 
     private void initViewData() {
@@ -57,6 +69,11 @@ public class ImageGridViewModel extends BaseViewModel {
     @NonNull
     LiveData<Boolean> getIsEndData() {
         return isEndData;
+    }
+
+    @NonNull
+    public LiveData<Throwable> getError() {
+        return error;
     }
 
     void loadRepositoryData() {
@@ -90,7 +107,7 @@ public class ImageGridViewModel extends BaseViewModel {
         loadImage(query);
     }
 
-    void getMoreImage() {
+    void getMoreImage(boolean isRetry) {
 
         // 로딩중이면
         if (isLoading.getValue() != null && isLoading.getValue()) {
@@ -101,8 +118,10 @@ public class ImageGridViewModel extends BaseViewModel {
         if (isEndData.getValue() != null && isEndData.getValue()) {
             return;
         }
+        if (!isRetry) {
+            page++;
+        }
 
-        page++;
         loadImage(beforeQuery);
     }
 
@@ -118,16 +137,14 @@ public class ImageGridViewModel extends BaseViewModel {
 
         addDisposable(
                 repository.getImageList(query, requestType, page)
+                        .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(imageData -> {
                             Log.d("result", imageData.toString());
                             loadImageDataList.addAll(imageData.getDocuments());
                             imageDataList.setValue(loadImageDataList);
                             isEndData.setValue(imageData.getMeta().getIsEnd());
                             isLoading.setValue(false);
-                        }, e -> {
-                            Log.e("error", e.getMessage());
-                            isLoading.setValue(false);
-                        })
+                        }, e -> isLoading.setValue(false))
         );
     }
 

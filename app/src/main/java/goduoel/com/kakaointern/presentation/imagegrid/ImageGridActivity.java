@@ -25,11 +25,14 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.List;
 import java.util.Map;
 
 import goduoel.com.kakaointern.R;
 import goduoel.com.kakaointern.data.entity.ImageRequestType;
+import goduoel.com.kakaointern.data.error.RetryException;
 import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.databinding.ActivityMainGridBinding;
 import goduoel.com.kakaointern.presentation.BaseActivity;
@@ -119,7 +122,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
                             this, sharedElement, transitionName);
                     startActivityForResult(intent, Constants.REQUEST_CURRENT_POSITION, options.toBundle());
 
-                }, () -> binding.getImagegridVm().getMoreImage())
+                }, () -> binding.getImagegridVm().getMoreImage(false))
         );
     }
 
@@ -132,6 +135,22 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
     }
 
     private void observeLiveData() {
+        binding.getImagegridVm().getError().observe(this, e -> {
+            if (e instanceof RetryException) {
+                switch (((RetryException) e).getRetryType()) {
+                    case RETRY_REQUEST:
+                        Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
+                        break;
+                    case RETRY_FAIL:
+                        Snackbar snackbar = Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_INDEFINITE);
+                        snackbar.setAction("Yes", view -> binding.getImagegridVm().getMoreImage(true));
+                        snackbar.show();
+                        break;
+                }
+                return;
+            }
+            Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
+        });
         binding.getImagegridVm().getImageDataList().observe(this, imageDocuments -> {
         });
 
@@ -147,7 +166,6 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
         getMenuInflater().inflate(R.menu.image_search, menu);
         MenuItem searchMenu = menu.findItem(R.id.image_search);
         MenuItem searchFilter = menu.findItem(R.id.search_filter);
-
         searchMenu.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
 
             @Override
@@ -175,7 +193,6 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
             createFilterDialog();
             return false;
         });
-
         initSearchView(searchMenu);
     }
 
@@ -207,7 +224,6 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
         SearchView searchView = (SearchView) searchMenu.getActionView();
         searchView.setQueryHint(getString(R.string.image_search_hint));
         searchView.setMaxWidth(Integer.MAX_VALUE);
-
         ImageView searchImageView = searchView.findViewById(androidx.appcompat.R.id.search_button);
         searchImageView.setImageResource(R.drawable.btn_search);
 
@@ -227,6 +243,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
                 return true;
             }
         });
+        searchMenu.expandActionView();
     }
 
     private void saveToPassData() {
