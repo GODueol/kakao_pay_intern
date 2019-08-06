@@ -32,9 +32,7 @@ public class BindingAdapters {
             @NonNull final RecyclerView recyclerView,
             @Nullable final List<T> items) {
         final ListAdapter<T, VH> adapter = (ListAdapter<T, VH>) recyclerView.getAdapter();
-        if (adapter != null) {
-            adapter.submitList(items == null ? null : new ArrayList<>(items));
-        }
+        setItems(adapter, items);
     }
 
     @SuppressWarnings("unchecked")
@@ -43,6 +41,12 @@ public class BindingAdapters {
             @NonNull final ViewPager2 viewPager2,
             @Nullable final List<T> items) {
         final ListAdapter<T, VH> adapter = (ListAdapter<T, VH>) viewPager2.getAdapter();
+        setItems(adapter, items);
+    }
+
+    private static <T, VH extends RecyclerView.ViewHolder> void setItems(
+            @Nullable ListAdapter<T, VH> adapter,
+            @Nullable List<T> items) {
         if (adapter != null) {
             adapter.submitList(items == null ? null : new ArrayList<>(items));
         }
@@ -52,7 +56,6 @@ public class BindingAdapters {
     public static void loadUrlImage(AppCompatImageView imageView, String imageUri) {
         if (imageUri == null)
             return;
-
         Glide.with(imageView).load(imageUri)
                 .fitCenter()
                 .apply(new RequestOptions().error(R.drawable.img_load_fail))
@@ -66,7 +69,6 @@ public class BindingAdapters {
     public static void loadUrlImage(AppCompatImageView imageView, String imageUri, int radius) {
         if (imageUri == null)
             return;
-
         int dpRadius = UnitUtil.convertDpToPixel(imageView.getContext(), radius);
         Glide.with(imageView).load(imageUri)
                 .fitCenter()
@@ -75,17 +77,4 @@ public class BindingAdapters {
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imageView);
     }
-
-    @BindingAdapter({"uri", "thumbnail"})
-    public static void loadUrlImage(AppCompatImageView imageView, String imageUri, Drawable thumbnailUri) {
-        if (imageUri == null)
-            return;
-
-        Glide.with(imageView).load(imageUri)
-                .apply(new RequestOptions().error(R.drawable.img_load_fail))
-                .placeholder(thumbnailUri)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(imageView);
-    }
-
 }

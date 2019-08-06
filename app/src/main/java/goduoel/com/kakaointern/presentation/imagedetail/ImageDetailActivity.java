@@ -80,29 +80,33 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
 
     private void initView() {
 
-        binding.overlayMenu.setOnDownListener(v -> {
-            if (getCurrentGridITem() == null) {
-                return;
-            }
-            String url = getCurrentGridITem().getImageUrl();
-            beginDownload(url);
-        });
+        binding.overlayMenu.setOnDownListener(v ->
+                hasStoragePermission(() -> {
+                    if (getCurrentGridITem() == null) {
+                        return;
+                    }
+                    String url = getCurrentGridITem().getImageUrl();
+                    beginDownload(url);
+                }));
 
-        binding.overlayMenu.setOnShareListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("image/*");
-            if (getCurrentGridITem() == null) {
-                return;
-            }
-            String url = getCurrentGridITem().getImageUrl();
-            disposable = ImageUtil.getViewBitmapUri(this, url)
-                    .subscribeOn(AndroidSchedulers.mainThread())
-                    .subscribe(uri -> {
-                        intent.putExtra(Intent.EXTRA_STREAM, uri);
-                        startActivity(Intent.createChooser(intent, getString(R.string.share)));
-                    }, e -> Toast.makeText(this, getString(R.string.share_fail), Toast.LENGTH_SHORT).show());
+        binding.overlayMenu.setOnShareListener(v ->
+                hasStoragePermission(() -> {
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("image/*");
 
-        });
+                    if (getCurrentGridITem() == null) {
+                        return;
+                    }
+
+                    String url = getCurrentGridITem().getImageUrl();
+                    disposable = ImageUtil.getViewBitmapUri(ImageDetailActivity.this, url)
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(uri -> {
+                                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                                startActivity(Intent.createChooser(intent, getString(R.string.share)));
+                            }, e -> Toast.makeText(ImageDetailActivity.this, getString(R.string.share_fail), Toast.LENGTH_SHORT).show());
+
+                }));
 
         binding.overlayMenu.setOnSiteListener(v -> {
             if (getCurrentGridITem() == null) {

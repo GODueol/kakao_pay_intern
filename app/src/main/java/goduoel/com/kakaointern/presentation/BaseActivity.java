@@ -1,13 +1,20 @@
 package goduoel.com.kakaointern.presentation;
 
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+
+import goduoel.com.kakaointern.presentation.listener.OnPermissionListener;
+import goduoel.com.kakaointern.utils.Constants;
 
 public abstract class BaseActivity<B extends ViewDataBinding> extends AppCompatActivity {
 
@@ -22,6 +29,17 @@ public abstract class BaseActivity<B extends ViewDataBinding> extends AppCompatA
         binding = DataBindingUtil.setContentView(this, getLayoutResourceId());
         binding.setLifecycleOwner(this);
         Log.d(TAG, "onCreate");
+    }
+
+    public void hasStoragePermission(OnPermissionListener onPermissionListener) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.PERMISSION_REQUEST_STORAGE_CODE);
+        } else {
+            onPermissionListener.hasPermission();
+        }
     }
 
     @Override
