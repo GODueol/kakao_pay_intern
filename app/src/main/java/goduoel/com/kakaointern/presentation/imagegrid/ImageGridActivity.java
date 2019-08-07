@@ -218,6 +218,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
 
         View underline = searchView.findViewById(androidx.appcompat.R.id.search_plate);
         underline.setBackgroundColor(Color.TRANSPARENT);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
