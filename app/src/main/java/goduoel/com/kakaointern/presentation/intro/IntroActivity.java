@@ -8,7 +8,6 @@ import android.os.Bundle;
 import goduoel.com.kakaointern.R;
 import goduoel.com.kakaointern.databinding.ActivityIntroBinding;
 import goduoel.com.kakaointern.presentation.BaseActivity;
-import goduoel.com.kakaointern.presentation.imagedetail.ImageDetailActivity;
 import goduoel.com.kakaointern.presentation.imagegrid.ImageGridActivity;
 
 public class IntroActivity extends BaseActivity<ActivityIntroBinding> {

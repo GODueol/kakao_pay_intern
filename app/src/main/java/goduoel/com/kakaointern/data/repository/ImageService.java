@@ -1,18 +1,16 @@
 package goduoel.com.kakaointern.data.repository;
 
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
+import goduoel.com.kakaointern.utils.Constants;
 import io.reactivex.Single;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
-import retrofit2.http.Headers;
+import retrofit2.http.Header;
 import retrofit2.http.Query;
 
 class ImageService {
-
-    private static final String HOST = "https://dapi.kakao.com/";
-
     private imageSearchService imageSearchService;
 
 
@@ -22,7 +20,7 @@ class ImageService {
 
     private void initRetrofit() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(HOST)
+                .baseUrl(Constants.KAKAO_IMAGE_API_LOCATION)
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
@@ -37,13 +35,12 @@ class ImageService {
         static final ImageService INSTANCE = new ImageService();
     }
 
-    public imageSearchService getImageSearchService() {
+    imageSearchService getImageSearchService() {
         return imageSearchService;
     }
-    
+
     interface imageSearchService {
         @GET("v2/search/image")
-        @Headers("Authorization:KakaoAK 41f6c29216f4c9bd522e7e09434ebdfa")
-        Single<ImageDataResult> getImageList(@Query("query") String qeury, @Query("sort") String sorty, @Query("page") int page, @Query("size") int size);
+        Single<ImageDataResult> getImageList(@Header("Authorization") String authorization, @Query("query") String qeury, @Query("sort") String sorty, @Query("page") int page, @Query("size") int size);
     }
 }

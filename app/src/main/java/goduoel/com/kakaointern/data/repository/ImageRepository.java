@@ -3,6 +3,7 @@ package goduoel.com.kakaointern.data.repository;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import goduoel.com.kakaointern.BuildConfig;
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.data.entity.ImageRequestType;
 import goduoel.com.kakaointern.data.error.NoItemException;
@@ -34,7 +35,7 @@ public class ImageRepository implements ImageDataSource {
     @Override
     public Single<ImageDataResult> getImageList(String query, ImageRequestType sort, int page) {
         return ImageService.getInstance().getImageSearchService()
-                .getImageList(query, sort.getType(), page, Constants.REQUEST_DEFAULT_PAGE)
+                .getImageList(BuildConfig.KAKAO_IMAGE_API_KEY, query, sort.getType(), page, Constants.REQUEST_DEFAULT_PAGE)
                 .doOnSuccess(item -> {
                     if (item.getMeta().getTotalCount() == 0) {
                         errorMessage.onNext(new NoItemException());

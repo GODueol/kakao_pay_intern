@@ -1,7 +1,5 @@
 package goduoel.com.kakaointern.extension.databinding;
 
-import android.graphics.drawable.Drawable;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -14,14 +12,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
-import com.github.chrisbanes.photoview.PhotoView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import goduoel.com.kakaointern.R;
-import goduoel.com.kakaointern.data.entity.ImageDataResult;
-import goduoel.com.kakaointern.presentation.imagedetail.ImageDetailViewPagerAdapter;
 import goduoel.com.kakaointern.utils.UnitUtil;
 
 public class BindingAdapters {
@@ -60,7 +55,6 @@ public class BindingAdapters {
                 .fitCenter()
                 .apply(new RequestOptions().error(R.drawable.img_load_fail))
                 .placeholder(R.drawable.img_load_image)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imageView);
     }
 
@@ -74,7 +68,6 @@ public class BindingAdapters {
                 .fitCenter()
                 .apply(new RequestOptions().transform(new RoundedCorners(dpRadius)).error(R.drawable.img_load_fail))
                 .placeholder(R.drawable.ic_loading)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imageView);
     }
 }

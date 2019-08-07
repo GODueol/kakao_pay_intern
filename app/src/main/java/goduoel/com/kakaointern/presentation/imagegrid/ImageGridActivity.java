@@ -37,6 +37,7 @@ import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.databinding.ActivityMainGridBinding;
 import goduoel.com.kakaointern.presentation.BaseActivity;
 import goduoel.com.kakaointern.presentation.imagedetail.ImageDetailActivity;
+import goduoel.com.kakaointern.presentation.listener.OnItemClickListener;
 import goduoel.com.kakaointern.utils.Constants;
 
 
@@ -45,7 +46,9 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
     private static final String EXTRA_FILTER_TYPE = "EXTRA_FILTER_TYPE";
     private ImageRequestType filterType = ImageRequestType.ACCURACY;
     private ImageRequestType selectedType = ImageRequestType.ACCURACY;
-    private Bundle reenterState = null;
+    private Bundle enterState = null;
+
+    Snackbar snackbar;
 
     @Override
     protected int getLayoutResourceId() {
@@ -87,7 +90,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
         }
 
         if (resultCode == BaseActivity.RESULT_OK) {
-            reenterState = new Bundle(data.getExtras());
+            enterState = new Bundle(data.getExtras());
             int position = data.getIntExtra(ImageDetailActivity.EXTRA_CURRENT_POSITION, 0);
             syncRecyclerViewScroll(position);
         }
@@ -102,25 +105,12 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
 
         binding.recyclerGirdIamge.setLayoutManager(new GridLayoutManager(this, spanCount));
         binding.recyclerGirdIamge.addItemDecoration(new GridEqualSpacingItemDecoration(spanCount, 4));
-        binding.recyclerGirdIamge.setAdapter(
-                new ImageGridRecyclerViewAdapter((sharedElement, position) -> {
-                    appBarExpand(false);
-                    saveToPassData();
-                    Intent intent = new Intent(this, ImageDetailActivity.class);
-                    intent.putExtra(Constants.EXTRA_IMAGE_POSITION, position);
-                    intent.putExtra(Constants.EXTRA_IMAGE_TRANSITION_NAME, ViewCompat.getTransitionName(sharedElement));
-                    String transitionName = ViewCompat.getTransitionName(sharedElement);
 
-                    if (transitionName == null) {
-                        return;
-                    }
+        ImageGridRecyclerViewAdapter gridAdapter = new ImageGridRecyclerViewAdapter(onItemClickListener, () -> {
+            binding.getImagegridVm().getMoreImage(false);
+        });
 
-                    ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            this, sharedElement, transitionName);
-                    startActivityForResult(intent, Constants.REQUEST_CURRENT_POSITION, options.toBundle());
-
-                }, () -> binding.getImagegridVm().getMoreImage(false))
-        );
+        binding.recyclerGirdIamge.setAdapter(gridAdapter);
     }
 
     private void initViewModel() {
@@ -138,7 +128,7 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
                         Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
                         break;
                     case RETRY_FAIL:
-                        Snackbar snackbar = Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_INDEFINITE);
+                        snackbar = Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_INDEFINITE);
                         snackbar.setAction("Yes", view -> binding.getImagegridVm().getMoreImage(true));
                         snackbar.show();
                         break;
@@ -148,6 +138,9 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
             Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
         });
         binding.getImagegridVm().getImageDataList().observe(this, imageDocuments -> {
+            if (snackbar != null && snackbar.isShown()) {
+                snackbar.dismiss();
+            }
         });
 
         binding.getImagegridVm().getIsLoading().observe(this, bool ->
@@ -280,12 +273,10 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
             super.onMapSharedElements(names, sharedElements);
-            postponeEnterTransition();
-
-            if (reenterState != null) {
-                int position = reenterState.getInt(ImageDetailActivity.EXTRA_CURRENT_POSITION);
+            if (enterState != null) {
+                int position = enterState.getInt(ImageDetailActivity.EXTRA_CURRENT_POSITION);
                 final RecyclerView.ViewHolder viewHolder = binding.recyclerGirdIamge.findViewHolderForAdapterPosition(position);
-                reenterState = null;
+                enterState = null;
 
                 if (viewHolder == null) {
                     return;
@@ -306,6 +297,25 @@ public class ImageGridActivity extends BaseActivity<ActivityMainGridBinding> {
             }
         }
     };
+
+
+    private OnItemClickListener<Integer> onItemClickListener = (sharedElement, position) -> {
+        appBarExpand(false);
+        saveToPassData();
+        Intent intent = new Intent(ImageGridActivity.this, ImageDetailActivity.class);
+        intent.putExtra(Constants.EXTRA_IMAGE_POSITION, position);
+        intent.putExtra(Constants.EXTRA_IMAGE_TRANSITION_NAME, ViewCompat.getTransitionName(sharedElement));
+        String transitionName = ViewCompat.getTransitionName(sharedElement);
+
+        if (transitionName == null) {
+            return;
+        }
+
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                ImageGridActivity.this, sharedElement, transitionName);
+        startActivityForResult(intent, Constants.REQUEST_CURRENT_POSITION, options.toBundle());
+    };
+
 }
 
 

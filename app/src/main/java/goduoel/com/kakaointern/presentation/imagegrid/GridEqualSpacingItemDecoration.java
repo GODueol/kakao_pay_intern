@@ -25,8 +25,10 @@ public class GridEqualSpacingItemDecoration extends RecyclerView.ItemDecoration 
         int column = position % spanCount;
         int spacingPx = UnitUtil.convertDpToPixel(parent.getContext(), spacingDp);
 
-        outRect.left = spacingPx - column * spacingPx / spanCount;
-        outRect.right = (column + 1) * spacingPx / spanCount;
+        if (column == 0) {
+            outRect.left = spacingPx;
+        }
+        outRect.right = spacingPx;
 
         if (position < spanCount) {
             outRect.top = spacingPx;

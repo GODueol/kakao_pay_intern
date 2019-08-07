@@ -16,12 +16,13 @@ import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.databinding.ItemGridBinding;
 import goduoel.com.kakaointern.presentation.listener.OnItemClickListener;
 import goduoel.com.kakaointern.presentation.listener.OnPagingScrollListener;
+import goduoel.com.kakaointern.utils.Constants;
 
 public class ImageGridRecyclerViewAdapter extends ListAdapter<ImageDataResult.ImageDocument, ImageGridRecyclerViewAdapter.ImageGridAdapterViewHolder> {
 
-
     private OnItemClickListener<Integer> onItemClickListener;
     private OnPagingScrollListener onPagingScrollListener;
+    private long lastClickTime;
 
     ImageGridRecyclerViewAdapter(OnItemClickListener<Integer> onItemClickListener, OnPagingScrollListener onPagingScrollListener) {
         super(DIFF_CALLBACK);
@@ -35,7 +36,14 @@ public class ImageGridRecyclerViewAdapter extends ListAdapter<ImageDataResult.Im
 
         View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_grid, parent, false);
         ImageGridAdapterViewHolder holder = new ImageGridAdapterViewHolder(itemView);
-        itemView.setOnClickListener(v -> onItemClickListener.onItemClick(v, holder.getAdapterPosition()));
+        itemView.setOnClickListener(v -> {
+            long currentClickTime = System.currentTimeMillis();
+            if (currentClickTime - lastClickTime < Constants.THROTTLE_INTERVAL) {
+                return;
+            }
+            lastClickTime = currentClickTime;
+            onItemClickListener.onItemClick(v, holder.getAdapterPosition());
+        });
         return holder;
     }
 

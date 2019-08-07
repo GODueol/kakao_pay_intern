@@ -11,7 +11,6 @@ import java.util.List;
 import goduoel.com.kakaointern.data.entity.ImageDataResult;
 import goduoel.com.kakaointern.data.repository.ImageRepository;
 import goduoel.com.kakaointern.presentation.BaseViewModel;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class ImageDetailViewModel extends BaseViewModel {
 
@@ -21,27 +20,11 @@ public class ImageDetailViewModel extends BaseViewModel {
     private final MutableLiveData<List<ImageDataResult.ImageDocument>> imageDataList = new MutableLiveData<>();
     @NonNull
     private final MutableLiveData<Boolean> menuShowAndHide = new MutableLiveData<>();
-    @NonNull
-    private final MutableLiveData<Throwable> error = new MutableLiveData<>();
-
-    @NonNull
-    public LiveData<Throwable> getError() {
-        return error;
-    }
 
     private ImageDetailViewModel(ImageRepository repository) {
         this.repository = repository;
         initViewData();
         loadRepositoryData();
-        initHandleError();
-    }
-
-    private void initHandleError() {
-        addDisposable(repository.handleError()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(error::setValue, ignore -> {
-                })
-        );
     }
 
     private void loadRepositoryData() {
@@ -50,7 +33,6 @@ public class ImageDetailViewModel extends BaseViewModel {
 
     private void initViewData() {
         menuShowAndHide.setValue(false);
-
     }
 
     @NonNull

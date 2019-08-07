@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +30,10 @@ public abstract class BaseActivity<B extends ViewDataBinding> extends AppCompatA
         binding = DataBindingUtil.setContentView(this, getLayoutResourceId());
         binding.setLifecycleOwner(this);
         Log.d(TAG, "onCreate");
+    }
+
+    public void hideStatusBar() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     public void hasStoragePermission(OnPermissionListener onPermissionListener) {

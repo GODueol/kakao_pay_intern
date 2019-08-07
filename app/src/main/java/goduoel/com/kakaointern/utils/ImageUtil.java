@@ -14,11 +14,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class ImageUtil {
@@ -28,6 +26,7 @@ public class ImageUtil {
         return Single.fromCallable(() -> {
             Drawable drawable = Glide.with(context)
                     .asDrawable()
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
                     .load(url)
                     .submit()
                     .get();
@@ -51,6 +50,8 @@ public class ImageUtil {
                 bmpUri = Uri.fromFile(file);
             }
             return bmpUri;
-        }).subscribeOn(Schedulers.io());
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 }

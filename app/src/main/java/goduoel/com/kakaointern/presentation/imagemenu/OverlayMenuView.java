@@ -113,16 +113,7 @@ public class OverlayMenuView extends ConstraintLayout {
         animatorSet.playTogether(slideUp, slideDown);
         animatorSet.setDuration(500);
         animatorSet.start();
-
-
     }
-
-    public void enableButtons(boolean enable) {
-        binder.btnSite.setEnabled(enable);
-        binder.btnShare.setEnabled(enable);
-        binder.btnDownload.setEnabled(enable);
-    }
-
 
     public void setOnShareListener(OnClickListener onShareListener) {
         this.onShareListener = onShareListener;

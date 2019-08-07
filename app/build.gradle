@@ -18,6 +18,10 @@ android {
         }
     }
 
+    buildTypes.each {
+        it.buildConfigField 'String', 'KAKAO_IMAGE_API_KEY', "\"KakaoAK 41f6c29216f4c9bd522e7e09434ebdfa\""
+    }
+
     dataBinding {
         enabled = true
     }

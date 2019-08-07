@@ -33,18 +33,20 @@ import goduoel.com.kakaointern.presentation.BaseActivity;
 import goduoel.com.kakaointern.utils.Constants;
 import goduoel.com.kakaointern.utils.DownloadUtil;
 import goduoel.com.kakaointern.utils.ImageUtil;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 
 public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding> {
 
     public static final String EXTRA_CURRENT_POSITION = "EXTRA_CURRENT_POSITION";
-    private int imageDocumentPosition;
-    ImageDetailViewModel viewmodel;
+
+    private ImageDetailViewModel viewmodel;
+    private ImageDetailViewPagerAdapter pagerAdapter;
 
     private Disposable disposable;
-    private int newPosition;
-    private boolean isReturning = false;
+
+    private int enterPosition;
+    private int exitPosition;
+    private boolean isExit = false;
 
     @Override
     protected int getLayoutResourceId() {
@@ -59,32 +61,42 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         setEnterSharedElementCallback(enterElementCallback);
 
         Bundle extras = getIntent().getExtras();
+
         if (extras != null) {
-            imageDocumentPosition = extras.getInt(Constants.EXTRA_IMAGE_POSITION);
-        }
-        if (savedInstanceState != null) {
-            int savePosition = savedInstanceState.getInt(Constants.EXTRA_IMAGE_POSITION, -1);
-            imageDocumentPosition = savePosition != -1 ? savePosition : imageDocumentPosition;
+            enterPosition = extras.getInt(Constants.EXTRA_IMAGE_POSITION);
         }
 
-        registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        if (savedInstanceState != null) {
+            int savePosition = savedInstanceState.getInt(Constants.EXTRA_IMAGE_POSITION, -1);
+            enterPosition = savePosition != -1 ? savePosition : enterPosition;
+        }
+
+        registerReceiver(downloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         initViewModel();
         initView();
         initViewPager();
     }
 
-    private void hideStatusBar() {
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt(Constants.EXTRA_IMAGE_POSITION, binding.viewpagerImageDetail.getCurrentItem());
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+        unregisterReceiver(downloadReceiver);
+        super.onDestroy();
     }
 
     private void initView() {
 
         binding.overlayMenu.setOnDownListener(v ->
                 hasStoragePermission(() -> {
-                    if (getCurrentGridITem() == null) {
-                        return;
-                    }
                     String url = getCurrentGridITem().getImageUrl();
                     beginDownload(url);
                 }));
@@ -93,14 +105,8 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
                 hasStoragePermission(() -> {
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("image/*");
-
-                    if (getCurrentGridITem() == null) {
-                        return;
-                    }
-
                     String url = getCurrentGridITem().getImageUrl();
                     disposable = ImageUtil.getViewBitmapUri(ImageDetailActivity.this, url)
-                            .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(uri -> {
                                 intent.putExtra(Intent.EXTRA_STREAM, uri);
                                 startActivity(Intent.createChooser(intent, getString(R.string.share)));
@@ -109,9 +115,6 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
                 }));
 
         binding.overlayMenu.setOnSiteListener(v -> {
-            if (getCurrentGridITem() == null) {
-                return;
-            }
             String url = getCurrentGridITem().getDocUrl();
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse(url));
@@ -121,26 +124,10 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         binding.overlayMenu.setOnBackListner(v -> finishAfterTransition());
     }
 
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        // 화면 전환 페이지 저장
-        outState.putInt(Constants.EXTRA_IMAGE_POSITION, binding.viewpagerImageDetail.getCurrentItem());
-        super.onSaveInstanceState(outState);
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        if (disposable != null && !disposable.isDisposed()) {
-            disposable.dispose();
-        }
-        unregisterReceiver(onDownloadComplete);
-        super.onDestroy();
-    }
-
     private void initViewPager() {
-        binding.viewpagerImageDetail.setAdapter(new ImageDetailViewPagerAdapter(viewmodel, imageDocumentPosition));
-        binding.viewpagerImageDetail.post(() -> binding.viewpagerImageDetail.setCurrentItem(imageDocumentPosition, false));
+        pagerAdapter = new ImageDetailViewPagerAdapter(viewmodel, enterPosition);
+        binding.viewpagerImageDetail.setAdapter(pagerAdapter);
+        binding.viewpagerImageDetail.post(() -> binding.viewpagerImageDetail.setCurrentItem(enterPosition, false));
     }
 
     private void initViewModel() {
@@ -157,7 +144,6 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
             } else {
                 binding.overlayMenu.setLayoutShow(false);
             }
-
         });
     }
 
@@ -173,25 +159,27 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
     }
 
     private void setResult() {
-        isReturning = true;
+        isExit = true;
 
-        newPosition = binding.viewpagerImageDetail.getCurrentItem();
+        exitPosition = binding.viewpagerImageDetail.getCurrentItem();
         Intent intent = new Intent();
         intent.putExtra(EXTRA_CURRENT_POSITION, binding.viewpagerImageDetail.getCurrentItem());
         setResult(Activity.RESULT_OK, intent);
     }
 
     private ImageDataResult.ImageDocument getCurrentGridITem() {
-        ImageDetailViewPagerAdapter imageDetailViewPagerAdapter =
-                ((ImageDetailViewPagerAdapter) binding.viewpagerImageDetail.getAdapter());
-        return imageDetailViewPagerAdapter != null ? imageDetailViewPagerAdapter.getCurrentList().get(binding.viewpagerImageDetail.getCurrentItem()) : null;
+        return pagerAdapter.getCurrentList().get(binding.viewpagerImageDetail.getCurrentItem());
     }
 
     private void beginDownload(String url) {
-        DownloadUtil.DownloadImageFIleToUrl(this, url);
+        try {
+            DownloadUtil.DownloadImageFIleToUrl(this, url);
+        } catch (Exception e) {
+            Toast.makeText(ImageDetailActivity.this, "다운로드 실패", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
+    private BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -226,10 +214,10 @@ public class ImageDetailActivity extends BaseActivity<ActivityImageDetailBinding
         @Override
         public void onMapSharedElements(List<String> names, Map<String, View> sharedElements) {
             super.onMapSharedElements(names, sharedElements);
-            if (isReturning) {
+            if (isExit) {
 
                 RecyclerView recyclerView = ((RecyclerView) binding.viewpagerImageDetail.getChildAt(0));
-                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(newPosition);
+                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(exitPosition);
                 if (viewHolder == null) {
                     return;
                 }

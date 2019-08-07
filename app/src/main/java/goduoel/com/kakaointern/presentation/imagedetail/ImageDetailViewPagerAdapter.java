@@ -74,7 +74,6 @@ public class ImageDetailViewPagerAdapter extends ListAdapter<ImageDataResult.Ima
                 })
                 .apply(new RequestOptions().error(R.drawable.img_load_fail))
                 .placeholder(R.drawable.img_load_image)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.binding.detailImage);
     }
 

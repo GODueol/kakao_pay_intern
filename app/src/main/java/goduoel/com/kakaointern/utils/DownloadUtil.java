@@ -14,7 +14,7 @@ import static android.os.Environment.DIRECTORY_PICTURES;
 public class DownloadUtil {
     private static final String FILE_EXTENSTION_PNG = ".png";
 
-    public static void DownloadImageFIleToUrl(Context context, String url) {
+    public static void DownloadImageFIleToUrl(Context context, String url) throws Exception {
         String appName = context.getString(R.string.app_name);
         String description = context.getString(R.string.donwloading);
 

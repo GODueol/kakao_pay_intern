@@ -16,30 +16,15 @@ public class ImageDataResult {
     @SerializedName("documents")
     private List<ImageDocument> documents = null;
 
-    private String errorMessage;
-
     public ImageDataResult() {
-
-    }
-
-    public ImageDataResult(String errorMessage) {
-        this.errorMessage = errorMessage;
     }
 
     public ImageMeta getMeta() {
         return meta;
     }
 
-    public void setMeta(ImageMeta meta) {
-        this.meta = meta;
-    }
-
     public List<ImageDocument> getDocuments() {
         return documents;
-    }
-
-    public void setDocuments(List<ImageDocument> documents) {
-        this.documents = documents;
     }
 
     @Override
@@ -64,15 +49,6 @@ public class ImageDataResult {
                 '}';
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
-
-
     public static class ImageMeta {
 
         @SerializedName("total_count")
@@ -86,24 +62,12 @@ public class ImageDataResult {
             return totalCount;
         }
 
-        public void setTotalCount(Integer totalCount) {
-            this.totalCount = totalCount;
-        }
-
         public Integer getPageableCount() {
             return pageableCount;
         }
 
-        public void setPageableCount(Integer pageableCount) {
-            this.pageableCount = pageableCount;
-        }
-
         public Boolean getIsEnd() {
             return isEnd;
-        }
-
-        public void setIsEnd(Boolean isEnd) {
-            this.isEnd = isEnd;
         }
 
         @Override
@@ -132,7 +96,7 @@ public class ImageDataResult {
 
     }
 
-    public static class ImageDocument implements Parcelable {
+    public static class ImageDocument {
 
         @SerializedName("collection")
         private String collection;
@@ -170,80 +134,36 @@ public class ImageDataResult {
             datetime = in.readString();
         }
 
-        public static final Creator<ImageDocument> CREATOR = new Creator<ImageDocument>() {
-            @Override
-            public ImageDocument createFromParcel(Parcel in) {
-                return new ImageDocument(in);
-            }
-
-            @Override
-            public ImageDocument[] newArray(int size) {
-                return new ImageDocument[size];
-            }
-        };
-
         public String getCollection() {
             return collection;
-        }
-
-        public void setCollection(String collection) {
-            this.collection = collection;
         }
 
         public String getThumbnailUrl() {
             return thumbnailUrl;
         }
 
-        public void setThumbnailUrl(String thumbnailUrl) {
-            this.thumbnailUrl = thumbnailUrl;
-        }
-
         public String getImageUrl() {
             return imageUrl;
-        }
-
-        public void setImageUrl(String imageUrl) {
-            this.imageUrl = imageUrl;
         }
 
         public Integer getWidth() {
             return width;
         }
 
-        public void setWidth(Integer width) {
-            this.width = width;
-        }
-
         public Integer getHeight() {
             return height;
-        }
-
-        public void setHeight(Integer height) {
-            this.height = height;
         }
 
         public String getDisplaySitename() {
             return displaySitename;
         }
 
-        public void setDisplaySitename(String displaySitename) {
-            this.displaySitename = displaySitename;
-        }
-
         public String getDocUrl() {
             return docUrl;
         }
 
-        public void setDocUrl(String docUrl) {
-            this.docUrl = docUrl;
-        }
-
         public String getDatetime() {
             return datetime;
-        }
-
-        public void setDatetime(String datetime) {
-            this.datetime = datetime;
         }
 
         @Override
@@ -280,31 +200,5 @@ public class ImageDataResult {
                     '}';
         }
 
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(collection);
-            dest.writeString(thumbnailUrl);
-            dest.writeString(imageUrl);
-            if (width == null) {
-                dest.writeByte((byte) 0);
-            } else {
-                dest.writeByte((byte) 1);
-                dest.writeInt(width);
-            }
-            if (height == null) {
-                dest.writeByte((byte) 0);
-            } else {
-                dest.writeByte((byte) 1);
-                dest.writeInt(height);
-            }
-            dest.writeString(displaySitename);
-            dest.writeString(docUrl);
-            dest.writeString(datetime);
-        }
     }
 }
